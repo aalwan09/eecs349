@@ -90,6 +90,7 @@ class ID3Solver:
 	def calc_E_T(self):
 		freq_true = float(self.numberTrue)/float(self.trainingSetSize)
 		freq_false = float(self.numberFalse)/float(self.trainingSetSize)
+		print freq_true
 		self.entropyOfTarget = -1*(freq_true*math.log(freq_true, 2)) - (freq_false*math.log(freq_false, 2))
 		print self.entropyOfTarget
 	
