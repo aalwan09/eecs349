@@ -3,7 +3,43 @@ import sys
 import random
 import math
 
+def calc_E(freq_true, freq_false):
+		if (((freq_true == 0) & (freq_false != 0)) | ((freq_true != 0) & (freq_false == 0))):
+			return 0
+		else:
+			return -1*(float(freq_true)*math.log(float(freq_true), 2)) - (float(freq_false)*math.log(float(freq_false), 2))
 
+class Attribute:
+	informationGain = 0
+	entropyToTarget = 0
+	name = ""
+	index_in_data = 0
+	def __init__(self, name, tt, tf, ft, ff, entropyOfTarget, index):
+		#print "In Attribute: "
+		total = tt+tf+ft+ff
+		self.name = name
+		"""
+		print "total: "
+		print total
+		print "tt: "
+		print tt
+		print "tf: "
+		print tf
+		print "ft: "
+		print ft
+		print "ff: "
+		print ff
+		"""
+		self.index_in_data = index
+		self.entropyToTarget = float(tt+tf)/float(total) * calc_E(float(tt)/float(tt+tf), float(tf)/float(tt+tf)) + float(ft+ff)/float(total) * calc_E(float(ft)/float(ft+ff), float(ff)/float(ft+ff))
+		self.informationGain = entropyOfTarget - self.entropyToTarget
+	def print_me(self):
+		print "Attribute Name: " + self.name
+		print "\t Information Gain: " + str(self.informationGain)
+		print "\t Entropy w.r.t target: " + str(self.entropyToTarget)
+		print "\t Index in data: " + str(self.index_in_data)
+		
+		
 
 class ID3Solver:
 	inputFileName = ""
@@ -26,6 +62,8 @@ class ID3Solver:
 
 	entropyOfTarget = 0;
 
+	attributes = []
+
 	
 	def __init__(self):
 
@@ -46,6 +84,32 @@ class ID3Solver:
 		if (self.process_text()):
 			self.calc_prior()
 			self.calc_E_T()	
+			index = 0
+			for x in self.categories:
+				tt = 0 
+				tf = 0
+				ft = 0
+				ff = 0
+				for y in self.trainingSet:
+					if (y[index] == "true "):
+						if (y[len(self.categories)] == "true"):
+							tt += 1
+						elif (y[len(self.categories)] == "false"):
+							tf += 1
+					elif (y[index] == "false "):
+						if (y[len(self.categories)] == "true"):
+							ft += 1
+						elif (y[len(self.categories)] == "false"):
+							ff += 1
+					else:
+						sys.exit("Error 2, unidentified classifier")
+				self.attributes.append(Attribute(x, tt, tf, ft, ff, self.entropyOfTarget,index))
+				index += 1
+				
+			for element in self.attributes:
+				element.print_me()
+				
+				
 	
 	def print_input(self):
 		for row in self.reader:
@@ -54,6 +118,7 @@ class ID3Solver:
 	def process_text(self):
 		try:
 			self.categories = next(self.reader)
+			del self.categories[-1]
 			entire_data_list = list(self.reader)	
 			self.dataSize = len(entire_data_list)
 			for x in range(0,self.trainingSetSize):
@@ -72,9 +137,9 @@ class ID3Solver:
 	def calc_prior(self):
 		print self.trainingSet
 		for x in self.trainingSet:
-			if (x[len(self.categories)-1] == "true"):
+			if (x[len(self.categories)] == "true"):
 				self.numberTrue += 1
-			elif (x[len(self.categories)-1] == "false"):
+			elif (x[len(self.categories)] == "false"):
 				self.numberFalse += 1
 			else:
 				sys.exit("Error, unidentified classifier")
@@ -90,8 +155,10 @@ class ID3Solver:
 	def calc_E_T(self):
 		freq_true = float(self.numberTrue)/float(self.trainingSetSize)
 		freq_false = float(self.numberFalse)/float(self.trainingSetSize)
-		self.entropyOfTarget = -1*(freq_true*math.log(freq_true, 2)) - (freq_false*math.log(freq_false, 2))
-		print self.entropyOfTarget
+		self.entropyOfTarget = calc_E(freq_true, freq_false)
+		print "Entropy of Target Concept: " + str(self.entropyOfTarget)
+
+
 	
 
 
