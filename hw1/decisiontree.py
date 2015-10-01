@@ -4,10 +4,14 @@ import random
 import math
 
 def calc_E(freq_true, freq_false):
-		if (((freq_true == 0) & (freq_false != 0)) | ((freq_true != 0) & (freq_false == 0))):
+		if ((freq_true == 0) | (freq_false == 0)):
 			return 0
 		else:
-			return -1*(float(freq_true)*math.log(float(freq_true), 2)) - (float(freq_false)*math.log(float(freq_false), 2))
+			try:
+				return -1*(float(freq_true)*math.log(float(freq_true), 2)) - (float(freq_false)*math.log(float(freq_false), 2))
+			except:
+				print "freq_true: " + str(freq_true)
+				print "freq_false: " + str(freq_false)
 
 class Attribute:
 	informationGain = 0
@@ -31,7 +35,24 @@ class Attribute:
 		print ff
 		"""
 		self.index_in_data = index
-		self.entropyToTarget = float(tt+tf)/float(total) * calc_E(float(tt)/float(tt+tf), float(tf)/float(tt+tf)) + float(ft+ff)/float(total) * calc_E(float(ft)/float(ft+ff), float(ff)/float(ft+ff))
+		
+		if ((tt+tf) == 0):
+			P_tt = 0.
+			P_tf = 0.
+		else: 
+			P_tt = float(tt)/float(tt+tf)	
+			P_tf = float(tf)/float(tt+tf)
+
+		if ((ft+ff) == 0):
+			P_ft = 0.
+			P_ff = 0.
+		else: 
+			P_ft = float(ft)/float(ft+ff)	
+			P_ff = float(ff)/float(ft+ff)
+
+				
+		
+		self.entropyToTarget = float(tt+tf)/float(total) * calc_E(P_tt, P_tf) + float(ft+ff)/float(total) * calc_E(P_ft, P_ff)
 		self.informationGain = entropyOfTarget - self.entropyToTarget
 	def print_me(self):
 		print "Attribute Name: " + self.name
@@ -65,22 +86,23 @@ class ID3Solver:
 	attributes = []
 
 	
-	def __init__(self):
-
-		if ((len(sys.argv) < 5) | (len(sys.argv) > 5)):
-			sys.exit( "Wrong number of command line arguments. \n Usage: python decisiontree.py <inputFileName> <trainingSetSize> <numberOfTrials> <verbose> ")
-		else:
-			try:
-				self.inputFileName = str(sys.argv[1])
-				self.trainingSetSize = int(sys.argv[2])
-				self.numberOfTrials = int(sys.argv[3])
-				self.verbose = bool(sys.argv[4])
-			except:
-				sys.exit("The provided arguments are malformed")
-		self.reader = csv.reader(open(self.inputFileName, 'rb'), delimiter='\t')
+	def __init__(self, inputFileName, trainingSetSize, numberOfTrials, verbose):
+		self.inputFileName = inputFileName
+		self.trainingSetSize = trainingSetSize
+		self.numberOfTrials = numberOfTrials
+		self.verbose = verbose
+		
+		print "Starting ID3 Solver with following arguments:"
+		print "Input file: " + self.inputFileName
+		print "Trainingset size: " + str(self.trainingSetSize)
+		print "Number of trials: " + str(self.numberOfTrials)
+		if (self.verbose):
+			print "RUNNING VERBOSE MODE"
 		self.runTree()
 
 	def runTree(self):
+		f = open(self.inputFileName, 'rb');
+		self.reader = csv.reader(f, delimiter='\t')
 		if (self.process_text()):
 			self.calc_prior()
 			self.calc_E_T()	
@@ -108,6 +130,12 @@ class ID3Solver:
 				
 			for element in self.attributes:
 				element.print_me()
+		f.close() 
+		del self.trainingSet[:]
+		del self.testingSet[:]
+		del self.categories[:]
+		del self.attributes[:]
+		
 				
 				
 	
@@ -135,7 +163,7 @@ class ID3Solver:
 			return 0
 
 	def calc_prior(self):
-		print self.trainingSet
+		#print self.trainingSet
 		for x in self.trainingSet:
 			if (x[len(self.categories)] == "true"):
 				self.numberTrue += 1
@@ -164,4 +192,17 @@ class ID3Solver:
 
 
 if __name__ == "__main__":
-    solver = ID3Solver()
+	if ((len(sys.argv) < 5) | (len(sys.argv) > 5)):
+		sys.exit( "Wrong number of command line arguments. \n Usage: python decisiontree.py <inputFileName> <trainingSetSize> <numberOfTrials> <verbose> ")
+	else:
+		try:
+			inputFileName = str(sys.argv[1])
+			trainingSetSize = int(sys.argv[2])
+			numberOfTrials = int(sys.argv[3])
+			verbose = bool(sys.argv[4])
+		except:
+			sys.exit("The provided arguments are malformed")
+	for x in range(1,numberOfTrials+1):
+		print "TRIAL: " + str(x)
+    		solver = ID3Solver(inputFileName, trainingSetSize, numberOfTrials, verbose)
+		del solver
