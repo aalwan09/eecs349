@@ -224,6 +224,8 @@ class ID3Solver:
 		###call the recursive function in here
 		rootNode = self.createTree(self.trainingSet, self.categories, "root")
 		
+		print self.print_node(rootNode)
+		
 		
 
 
@@ -237,27 +239,42 @@ class ID3Solver:
 		self.entropyOfTarget = update_E_T(local_trainingSet, local_categories)
 		newNode = findHighestIG(local_trainingSet, local_categories, self.entropyOfTarget)
 		newNode.parent = parent
-		print "New Node: Parent: " + str(parent) + " Attribute: " +str(newNode.attribute)
+		#print "New Node: Parent: " + str(parent) + " Attribute: " +str(newNode.attribute)
 		#print "Passed categories: " + str(local_categories)
 		trueChild_trainingSet = trueTraining(local_trainingSet, local_categories, newNode.attribute)
 		falseChild_trainingSet = falseTraining(local_trainingSet, local_categories, newNode.attribute)
 		new_categories = update_categories(local_categories, newNode.attribute)
-		if (len(new_categories) == 1):
-			finalNode = node(str(newNode.attribute), str(new_categories[0]), "", "")
-			return finalNode
+		if (len(new_categories) == 0):
+			print "ran out of categories"
+			if (int(newNode.tt) > int(newNode.tf)):
+				newNode.trueChild = "True"
+			else:
+				newNode.trueChild = "False"
+			if (int(newNode.ft) > int(newNode.ff)):
+				newNode.falseChild = "True"
+			else:
+				newNode.falseChild = "False"
+			return newNode
 		elif ((self.entropyOfTarget-newNode.informationGain)!=0.):
 			newNode.trueChild = self.createTree(trueChild_trainingSet, new_categories, newNode.attribute)
 			newNode.falseChild = self.createTree(falseChild_trainingSet, new_categories, newNode.attribute)
 		elif ((self.entropyOfTarget-newNode.informationGain) == 0.0):
-			if (newNode.tt > newNode.tf):
+			print "found final node with tt = " + str(newNode.tt) + "and tf = " +str(newNode.tf)
+			if (int(newNode.tt) > int(newNode.tf)):
 				newNode.trueChild = "True"
 			else:
 				newNode.trueChild = "False"
-			if (newNode.ft > newNode.ff):
+			if (int(newNode.ft) > int(newNode.ff)):
 				newNode.falseChild = "True"
 			else:
 				newNode.falseChild = "False"
 		return newNode 
+	
+	def print_node(self, input):
+		if isinstance(input, node):
+			return "[NODE: Parent=" + str(input.parent) + " Attribute=" + str(input.attribute) + " trueChild=" + self.print_node(input.trueChild) + " falseChild=" + self.print_node(input.falseChild) + "]"
+		else:
+			return str(input)
 
 	def calc_prior(self):
 		#print self.trainingSet
