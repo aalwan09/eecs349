@@ -31,12 +31,12 @@ def findHighestIG(local_trainingSet, local_categories, entropyOfTarget):
 		ft = 0
 		ff = 0
 		for y in local_trainingSet:
-			if (y[index] == "true "):
+			if (y[index].replace(" ", "") == "true"):
 				if (y[-1] == "true"):
 					tt += 1
 				elif (y[-1] == "false"):
 					tf += 1
-			elif (y[index] == "false "):
+			elif (y[index].replace(" ", "") == "false"):
 				if (y[-1] == "true"):
 					ft += 1
 				elif (y[-1] == "false"):
@@ -56,7 +56,10 @@ def findHighestIG(local_trainingSet, local_categories, entropyOfTarget):
 			P_ff = float(ff)/float(ft+ff)
 			
 		total = tt+tf+ft+ff
-		entropyToTarget = float(tt+tf)/float(total) * calc_E(P_tt, P_tf) + float(ft+ff)/float(total) * calc_E(P_ft, P_ff)
+		if (total != 0.):
+			entropyToTarget = float(tt+tf)/float(total) * calc_E(P_tt, P_tf) + float(ft+ff)/float(total) * calc_E(P_ft, P_ff)
+		else:
+			entropyToTarget = 0.
 		informationGain = entropyOfTarget - entropyToTarget
 		if (informationGain > max_information_gain):
 			max_information_gain = informationGain
@@ -86,7 +89,7 @@ def	trueTraining(input_trainingSet, input_categories, attribute):
 			index += 1
 	output_trainingSet = []
 	for x in input_trainingSet:
-		if (x[index] == "true "):
+		if (x[index].replace(" ", "") == "true"):
 			output_trainingSet.append(x[0:index] + x[index+1:len(x)])	
 	return output_trainingSet
 
@@ -99,7 +102,7 @@ def	falseTraining(input_trainingSet, input_categories, attribute):
 			index += 1
 	output_trainingSet = []
 	for x in input_trainingSet:
-		if (x[index] == "false "):
+		if (x[index].replace(" ", "") == "false"):
 			output_trainingSet.append(x[0:index] + x[index+1:len(x)])
 	return output_trainingSet
 	
@@ -270,15 +273,14 @@ class ID3Solver:
 		if (len(new_categories) == 0):
 			print "ran out of categories"
 			if (int(newNode.tt) > int(newNode.tf)):
-				newNode.trueChild = "True"
+				newNode.trueChild = "true"
 			else:
-				newNode.trueChild = "False"
+				newNode.trueChild = "false"
 			if (int(newNode.ft) > int(newNode.ff)):
-				newNode.falseChild = "True"
+				newNode.falseChild = "true"
 			else:
-				newNode.falseChild = "False"
+				newNode.falseChild = "false"
 			return newNode
-			
 		if (update_E_T(trueChild_trainingSet) ==0.):
 			newNode.trueChild = trueChild_trainingSet[0][-1]
 			#print "Set trueChild to: " + str(newNode.trueChild)
@@ -301,9 +303,9 @@ class ID3Solver:
 	def calc_prior(self):
 		#print self.trainingSet
 		for x in self.trainingSet:
-			if (x[len(self.categories)] == "true"):
+			if (x[-1] == "true"):
 				self.numberTrue += 1
-			elif (x[len(self.categories)] == "false"):
+			elif (x[-1] == "false"):
 				self.numberFalse += 1
 			else:
 				sys.exit("Error, unidentified classifier")
