@@ -120,7 +120,7 @@ def update_categories(input_categories, attribute):
 	return output
 	
 	
-def update_E_T(trainingSet, categories):
+def update_E_T(trainingSet):
 	numberTrue = 0
 	numberFalse = 0
 	for x in trainingSet:
@@ -133,7 +133,7 @@ def update_E_T(trainingSet, categories):
 	freq_true = float(numberTrue)/float(len(trainingSet))
 	freq_false = float(numberFalse)/float(len(trainingSet))
 	out = calc_E(freq_true, freq_false)
-	print "Entropy of Target: " + str(out)
+	#print "Entropy of Target: " + str(out)
 	return out
 
 class node:
@@ -213,20 +213,31 @@ class ID3Solver:
 		if (verbose):
 			print self.categories
 			print self.trainingSet
-		
+		#calculate prior probability
 		self.calc_prior()
+		#calculate entropy of target
+		self.calc_E_T(); 
 		
-		self.calc_E_T();
-        
-		#testNode = self.findHighestIG(self.trainingSet, self.categories, self.entropyOfTarget)
-		#print testNode.attribute
+
 		
 		###call the recursive function in here
 		rootNode = self.createTree(self.trainingSet, self.categories, "root")
 		
 		print self.print_node(rootNode)
 		
+		print "testing performance"
 		
+		testCount = 0
+		goodCount = 0
+		badCount = 0
+		for x in self.testingSet:
+			if (self.run_example(x, rootNode)):
+				goodCount +=1
+			else:
+				badCount += 1
+			testCount += 1
+		
+		print "Total Tests:" + str(testCount) + " Good: " + str(goodCount) + " Bad: " + str(badCount)
 
 
 		f.close()
@@ -236,7 +247,7 @@ class ID3Solver:
 		del self.attributes[:]
 		
 	def createTree(self, local_trainingSet, local_categories, parent):
-		self.entropyOfTarget = update_E_T(local_trainingSet, local_categories)
+		self.entropyOfTarget = update_E_T(local_trainingSet)
 		newNode = findHighestIG(local_trainingSet, local_categories, self.entropyOfTarget)
 		newNode.parent = parent
 		#print "New Node: Parent: " + str(parent) + " Attribute: " +str(newNode.attribute)
@@ -255,19 +266,18 @@ class ID3Solver:
 			else:
 				newNode.falseChild = "False"
 			return newNode
-		elif ((self.entropyOfTarget-newNode.informationGain)!=0.):
-			newNode.trueChild = self.createTree(trueChild_trainingSet, new_categories, newNode.attribute)
-			newNode.falseChild = self.createTree(falseChild_trainingSet, new_categories, newNode.attribute)
-		elif ((self.entropyOfTarget-newNode.informationGain) == 0.0):
-			print "found final node with tt = " + str(newNode.tt) + "and tf = " +str(newNode.tf)
-			if (int(newNode.tt) > int(newNode.tf)):
-				newNode.trueChild = "True"
-			else:
-				newNode.trueChild = "False"
-			if (int(newNode.ft) > int(newNode.ff)):
-				newNode.falseChild = "True"
-			else:
-				newNode.falseChild = "False"
+			
+		if (update_E_T(trueChild_trainingSet) ==0.):
+			newNode.trueChild = trueChild_trainingSet[0][-1]
+			#print "Set trueChild to: " + str(newNode.trueChild)
+		else:
+			newNode.trueChild = self.createTree(trueChild_trainingSet, new_categories, newNode.attribute)	
+		
+		if (update_E_T(falseChild_trainingSet) ==0.):
+			newNode.falseChild = falseChild_trainingSet[0][-1]
+			#print "Set falseChild to: " + str(newNode.falseChild)
+		else:
+			newNode.falseChild = self.createTree(falseChild_trainingSet, new_categories, newNode.attribute)	
 		return newNode 
 	
 	def print_node(self, input):
@@ -298,7 +308,36 @@ class ID3Solver:
 		freq_true = float(self.numberTrue)/float(self.trainingSetSize)
 		freq_false = float(self.numberFalse)/float(self.trainingSetSize)
 		self.entropyOfTarget = calc_E(freq_true, freq_false)
-		print "Entropy of Target Concept: " + str(self.entropyOfTarget)
+		#print "Entropy of Target Concept: " + str(self.entropyOfTarget)
+		
+	def run_example(self, example, input):
+		if isinstance(input, node):
+			if (self.lookup_example(example, input.attribute) == "true "):
+				return self.run_example(example, input.trueChild)
+			elif (self.lookup_example(example, input.attribute) == "false "):
+				return self.run_example(example, input.falseChild)
+		else:
+			return self.exampleCheck(example, input)
+			
+	def exampleCheck(self, example, test):
+		if (example[-1] == test):
+			return 1
+		else:
+			return 0
+		
+	def lookup_example(self, example, attribute):
+		index = 0
+		#print "finding trueTrainign"
+		#print input_categories
+		for x in self.categories:
+			if (x == str(attribute)):
+				#print "found attribute in categories, index: " + str(index)
+				break
+			else:
+				index += 1
+		return str(example[index])
+	
+		
 
 
 if __name__ == "__main__":
