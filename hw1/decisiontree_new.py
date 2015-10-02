@@ -21,7 +21,10 @@ def findHighestIG(local_trainingSet, local_categories, entropyOfTarget):
 	max_information_gain = 0.;
 	max_information_gain_index = 0;
 	#print "trying to find highest IG"
-	
+	tt = 0
+	tf = 0
+	ft = 0
+	ff = 0
 	for x in local_categories:
 		tt = 0
 		tf = 0
@@ -29,14 +32,14 @@ def findHighestIG(local_trainingSet, local_categories, entropyOfTarget):
 		ff = 0
 		for y in local_trainingSet:
 			if (y[index] == "true "):
-				if (y[len(local_categories)] == "true"):
+				if (y[-1] == "true"):
 					tt += 1
-				elif (y[len(local_categories)] == "false"):
+				elif (y[-1] == "false"):
 					tf += 1
 			elif (y[index] == "false "):
-				if (y[len(local_categories)] == "true"):
+				if (y[-1] == "true"):
 					ft += 1
-				elif (y[len(local_categories)] == "false"):
+				elif (y[-1] == "false"):
 					ff += 1
 		if ((tt+tf) == 0):
 			P_tt = 0.
@@ -61,7 +64,13 @@ def findHighestIG(local_trainingSet, local_categories, entropyOfTarget):
 		
 		#print str(local_categories[index]) + " Information Gain = " + str(informationGain)
 		index += 1
+	#print "MAX IG NODE: " + str(local_categories[max_information_gain_index])
 	highestIGnode = node("null", local_categories[max_information_gain_index], "null", "null")
+	highestIGnode.informationGain = max_information_gain
+	highestIGnode.tt = tt
+	highestIGnode.tf = tf
+	highestIGnode.ft = ft
+	highestIGnode.ff = ff
 	return highestIGnode
 	
 def	trueTraining(input_trainingSet, input_categories, attribute):
@@ -109,12 +118,34 @@ def update_categories(input_categories, attribute):
 	#print "output from categories update: "
 	#print output
 	return output
+	
+	
+def update_E_T(trainingSet, categories):
+	numberTrue = 0
+	numberFalse = 0
+	for x in trainingSet:
+		if (x[-1] == "true"):
+			numberTrue += 1
+		elif (x[-1] == "false"):
+			numberFalse += 1
+		else:
+			sys.exit("Error, unidentified classifier")
+	freq_true = float(numberTrue)/float(len(trainingSet))
+	freq_false = float(numberFalse)/float(len(trainingSet))
+	out = calc_E(freq_true, freq_false)
+	print "Entropy of Target: " + str(out)
+	return out
 
 class node:
     parent = ""
     attribute = ""
     trueChild = ""
     falseChild = ""
+    informationGain = 0.
+    tt = 0
+    tf = 0
+    ft = 0
+    ff = 0
     def __init__(self, parent, attribute, trueChild, falseChild):
         self.parent = parent
         self.attribute = attribute
@@ -203,20 +234,30 @@ class ID3Solver:
 		del self.attributes[:]
 		
 	def createTree(self, local_trainingSet, local_categories, parent):
+		self.entropyOfTarget = update_E_T(local_trainingSet, local_categories)
 		newNode = findHighestIG(local_trainingSet, local_categories, self.entropyOfTarget)
 		newNode.parent = parent
+		print "New Node: Parent: " + str(parent) + " Attribute: " +str(newNode.attribute)
+		#print "Passed categories: " + str(local_categories)
 		trueChild_trainingSet = trueTraining(local_trainingSet, local_categories, newNode.attribute)
 		falseChild_trainingSet = falseTraining(local_trainingSet, local_categories, newNode.attribute)
 		new_categories = update_categories(local_categories, newNode.attribute)
-		if ((trueChild_trainingSet != []) & (falseChild_trainingSet != [])):
-			#print "in recursion"
-			#print "new categories: "
-			#print new_categories
+		if (len(new_categories) == 1):
+			finalNode = node(str(newNode.attribute), str(new_categories[0]), "", "")
+			return finalNode
+		elif ((self.entropyOfTarget-newNode.informationGain)!=0.):
 			newNode.trueChild = self.createTree(trueChild_trainingSet, new_categories, newNode.attribute)
 			newNode.falseChild = self.createTree(falseChild_trainingSet, new_categories, newNode.attribute)
-			return newNode
-		else:
-			return  
+		elif ((self.entropyOfTarget-newNode.informationGain) == 0.0):
+			if (newNode.tt > newNode.tf):
+				newNode.trueChild = "True"
+			else:
+				newNode.trueChild = "False"
+			if (newNode.ft > newNode.ff):
+				newNode.falseChild = "True"
+			else:
+				newNode.falseChild = "False"
+		return newNode 
 
 	def calc_prior(self):
 		#print self.trainingSet
@@ -241,13 +282,6 @@ class ID3Solver:
 		freq_false = float(self.numberFalse)/float(self.trainingSetSize)
 		self.entropyOfTarget = calc_E(freq_true, freq_false)
 		print "Entropy of Target Concept: " + str(self.entropyOfTarget)
-		
-
-		
-
-
-
-
 
 
 if __name__ == "__main__":
