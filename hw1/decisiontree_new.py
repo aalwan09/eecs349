@@ -282,13 +282,13 @@ class ID3Solver:
 				newNode.falseChild = "false"
 			return newNode
 		if (update_E_T(trueChild_trainingSet) ==0.):
-			newNode.trueChild = trueChild_trainingSet[0][-1]
+			newNode.trueChild = trueChild_trainingSet[0][-1].replace(" ", "")
 			#print "Set trueChild to: " + str(newNode.trueChild)
 		else:
 			newNode.trueChild = self.createTree(trueChild_trainingSet, new_categories, newNode.attribute)	
 		
 		if (update_E_T(falseChild_trainingSet) ==0.):
-			newNode.falseChild = falseChild_trainingSet[0][-1]
+			newNode.falseChild = falseChild_trainingSet[0][-1].replace(" ", "")
 			#print "Set falseChild to: " + str(newNode.falseChild)
 		else:
 			newNode.falseChild = self.createTree(falseChild_trainingSet, new_categories, newNode.attribute)	
@@ -326,9 +326,9 @@ class ID3Solver:
 		
 	def run_example(self, example, input):
 		if isinstance(input, node):
-			if (self.lookup_example(example, input.attribute) == "true "):
+			if (self.lookup_example(example, input.attribute) == "true"):
 				return self.run_example(example, input.trueChild)
-			elif (self.lookup_example(example, input.attribute) == "false "):
+			elif (self.lookup_example(example, input.attribute) == "false"):
 				return self.run_example(example, input.falseChild)
 		else:
 			return self.exampleCheck(example, input)
@@ -358,7 +358,7 @@ class ID3Solver:
 				break
 			else:
 				index += 1
-		return str(example[index])
+		return str(example[index]).replace(" ", "")
 	
 		
 
