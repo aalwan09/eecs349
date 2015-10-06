@@ -1,0 +1,61 @@
+tarting parameter test
+----------- NEW SETTING ----------------
+updated to setup: sC = 1 dC = 1 iC = 1 with error rate = 0.430051813472
+current setup: sC = 1 dC = 1 iC = 1 with error rate = 0.430051813472
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 1 iC = 1 with error rate = 0.430051813472
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 1 iC = 1 with error rate = 0.430051813472
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 2 iC = 1 with error rate = 0.492227979275
+----------- NEW SETTING ----------------
+updated to setup: sC = 2 dC = 2 iC = 1 with error rate = 0.40414507772
+current setup: sC = 2 dC = 2 iC = 1 with error rate = 0.40414507772
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 2 iC = 1 with error rate = 0.414507772021
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 4 iC = 1 with error rate = 0.720207253886
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 4 iC = 1 with error rate = 0.487046632124
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 4 iC = 1 with error rate = 0.40414507772
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 1 iC = 2 with error rate = 0.450777202073
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 1 iC = 2 with error rate = 0.466321243523
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 1 iC = 2 with error rate = 0.502590673575
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 2 iC = 2 with error rate = 0.497409326425
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 2 iC = 2 with error rate = 0.430051813472
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 2 iC = 2 with error rate = 0.430051813472
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 4 iC = 2 with error rate = 0.720207253886
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 4 iC = 2 with error rate = 0.492227979275
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 4 iC = 2 with error rate = 0.40414507772
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 1 iC = 4 with error rate = 0.455958549223
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 1 iC = 4 with error rate = 0.512953367876
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 1 iC = 4 with error rate = 0.59585492228
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 2 iC = 4 with error rate = 0.497409326425
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 2 iC = 4 with error rate = 0.450777202073
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 2 iC = 4 with error rate = 0.466321243523
+----------- NEW SETTING ----------------
+current setup: sC = 1 dC = 4 iC = 4 with error rate = 0.720207253886
+----------- NEW SETTING ----------------
+current setup: sC = 2 dC = 4 iC = 4 with error rate = 0.497409326425
+----------- NEW SETTING ----------------
+current setup: sC = 4 dC = 4 iC = 4 with error rate = 0.430051813472
+-----------------FINAL-----------------
+ideal setup: sC = 2 dC = 2 iC = 1 with error rate = 0.40414507772
+Time: 3761.77691483
+
