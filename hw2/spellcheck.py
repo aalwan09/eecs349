@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import sys
 import time
 
+
+
 def levenshtein_distance(string1, string2, deletionCost, insertionCost, substitutionCost):
 
 	m = len(string1)
@@ -50,18 +52,46 @@ def find_closest_word(string1, dictionary):
 
 	return closest_string
 
+def shiftInPlace(l, n):
+	n = n % len(l)
+	head = l[:n]
+	l[:n] = []
+	l.extend(head)
+	return l
 
 def measure_error(typos, truewords, dictionarywords):
+	
 	error_count = 0
 	tries = 0
 	index = 0
+	error_individual = [0 for x in range(0, len(typos))]
+	rolling_window = [0 for x in range(0,20)]
 	for typo in typos:
-		if (find_closest_word(typo, dictionarywords) != truewords[index]):
+		solution = find_closest_word(typo, dictionarywords) 
+		print "---------------------------------"
+		print "typo: " + typo + " correct would be: " + truewords[index] + " found: " + solution
+		if (solution != truewords[index]):
+			print "This is WRONG"
 			error_count += 1
 		else:	
-			pass
+			print "This is CORRECT"
+		
 		index += 1
 		tries += 1
+		print "STATISTICS:"
+		print "errors: " + str(error_count) + " out of: " + str(tries) + " remaining tests: " + str(len(typos)-tries)
+		error = (float(error_count)/float(tries))
+		error_individual[index-1] = error
+		rolling_window = shiftInPlace(rolling_window, 1)
+		rolling_window[-1] = error
+		print rolling_window
+
+		if ((max(rolling_window)-min(rolling_window) < 0.01) & (min(rolling_window) != 0)):
+			print "found correct number of trials: " + str(tries)
+			break
+	
+	plt.plot([x for x in range(0,tries)], error_individual[0:tries])
+	plt.show()
 	return float(error_count)/float(tries)
 		
 		
@@ -125,11 +155,14 @@ if __name__ == "__main__":
 
 	#for i in range(0, len(typos)):
 		#print str(typos[i]) + " corresponds to " + str(truewords[i])
-	print typos
-	print truewords
+	#print typos
+	#print truewords
+	
+	start = time.time()
 	print measure_error(typos, truewords, dictionary)
-	
-	
+	print "----------------------------"
+	print "----------------------------"
+	print "Time: " + str(time.time() -start)
 	
 	
 	
