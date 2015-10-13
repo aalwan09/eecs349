@@ -8,6 +8,16 @@ import scipy
 import math
 import matplotlib.pyplot as plt
 
+
+def evaluateX(x, W):
+	out = 0
+	index = 0
+	for w in W:
+		out = out + math.pow(float(x), index) * float(w)
+		index += 1
+	return out
+
+
 def calcW(X_in,Y_in,m):
 # 	calcW takes in two data vectors and the degree of the expected polynomials and returns the coefficients in the matrix W
 	index = 0
@@ -51,7 +61,74 @@ def nfoldpolyfit(X, Y, maxK, n, verbose):
 #
 #   AUTHOR: Marc Gyongyosi (excl. the comments of this function)
 #
-	calcW(X,Y,4)
+
+	vals = np.arange(X.min(), X.max(), (X.max()+abs(X.min()))/100)
+	MSE_arr = [0 for x in range(0,maxK+1)]
+	MSE_min = 1000
+	k_min = 0
+	w_min = None
+	
+	for k in range(0,maxK+1):
+		MSE = 0
+		X_foldsets = np.split(X, n)
+		Y_foldsets = np.split(Y, n)
+		
+		for exp in range(1, n+1):
+			X_trainingset = X_foldsets[exp-1]
+			Y_trainingset = Y_foldsets[exp-1]
+			
+			index = 0
+			X_testingset = []
+			Y_testingset = []
+			for subset in X_foldsets:
+				if (index == exp-1):
+					pass
+				else:
+					X_testingset += subset.tolist()
+					Y_testingset += subset.tolist()
+				index +=1
+			#print X_testingset
+			#print X_trainingset
+			#print X
+			W = calcW(X_trainingset,Y_trainingset,k)
+			MSE_local = 0
+			
+			for x,y in zip(X_testingset,Y_testingset):
+				#print evaluateX(x,W)
+				MSE_local += math.pow((y-evaluateX(x,W)), 2)
+			MSE_local = MSE_local/len(X)
+			
+			if (MSE_local < MSE_min):
+				MSE_min = MSE_local
+				k_min = k
+				w_min = W
+			
+			h = []
+			for val in vals:
+				h.append(evaluateX(val, W))	
+			plt.plot(X,Y, 'ro', vals, h, 'k')
+			plt.show()
+			
+			print "Polynomial: " + str(k) + " Experiment: " + str(exp) + " MSE: " + str(MSE_local)
+			MSE += MSE_local
+		MSE_arr[k] = MSE/n
+	
+	print "--------------"
+	print "MSE for k in range 0 to " + str(maxK)
+	print MSE_arr
+	
+	print "Overall minimum MSE: " + str(MSE_min) + " with k = " + str(k_min)  + " and W = " 
+	print w_min
+	h = []
+	for val in vals:
+			h.append(evaluateX(val, w_min))	
+	plt.plot(X,Y,'ro', vals, h, 'k')
+	plt.show()
+	
+	
+		
+	
+	
 
 
 
