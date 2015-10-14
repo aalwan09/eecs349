@@ -73,15 +73,15 @@ def nfoldpolyfit(X, Y, maxK, n, verbose):
 		X_foldsets = np.split(X, n)
 		Y_foldsets = np.split(Y, n)
 		
-		for exp in range(1, n+1):
-			X_trainingset = X_foldsets[exp-1]
-			Y_trainingset = Y_foldsets[exp-1]
+		for exp in range(0, n):
+			X_trainingset = X_foldsets[exp]
+			Y_trainingset = Y_foldsets[exp]
 			
 			index = 0
 			X_testingset = []
 			Y_testingset = []
 			for subset in X_foldsets:
-				if (index == exp-1):
+				if (index == exp):
 					pass
 				else:
 					X_testingset += subset.tolist()
@@ -95,35 +95,62 @@ def nfoldpolyfit(X, Y, maxK, n, verbose):
 			
 			for x,y in zip(X_testingset,Y_testingset):
 				#print evaluateX(x,W)
+				#print "hypothesis says: " + str(evaluateX(x,W)) + " Data says: " + str(y)
 				MSE_local += math.pow((y-evaluateX(x,W)), 2)
-			MSE_local = MSE_local/len(X)
-			
-			if (MSE_local < MSE_min):
-				MSE_min = MSE_local
-				k_min = k
-				w_min = W
+			MSE_local = MSE_local/len(X_testingset)
 			
 			h = []
 			for val in vals:
 				h.append(evaluateX(val, W))	
-			plt.plot(X,Y, 'ro', vals, h, 'k')
-			plt.show()
+				
+			if (MSE_local < MSE_min):
+				MSE_min = MSE_local
+				k_min = k
+				w_min = W
+				#plt.plot(X_trainingset, Y_trainingset, 'ro', X_testingset,Y_testingset, 'bo', vals, h, 'k')
+				#plt.show()
 			
-			print "Polynomial: " + str(k) + " Experiment: " + str(exp) + " MSE: " + str(MSE_local)
+			
+			
+			#print "Training Set:"
+			#print X_trainingset
+			#print Y_trainingset
+			#print "Testing Set:"
+			#print X_testingset
+			#print Y_testingset
+			
+			if (verbose): 
+				print "Polynomial: " + str(k) + " Experiment: " + str(exp+1) + " MSE: " + str(MSE_local)
 			MSE += MSE_local
 		MSE_arr[k] = MSE/n
 	
 	print "--------------"
-	print "MSE for k in range 0 to " + str(maxK)
-	print MSE_arr
+	if (verbose):
+		print "MSE for k in range 0 to " + str(maxK)
+		print MSE_arr
 	
 	print "Overall minimum MSE: " + str(MSE_min) + " with k = " + str(k_min)  + " and W = " 
 	print w_min
 	h = []
 	for val in vals:
 			h.append(evaluateX(val, w_min))	
-	plt.plot(X,Y,'ro', vals, h, 'k')
-	plt.show()
+	
+	if (verbose):
+		plt.figure(1)
+		plt.subplot(211)
+		plt.plot(X,Y,'ro', vals, h, 'k')
+		plt.xlabel("X")
+		plt.ylabel("Y")
+		plt.title("Hypothesis vs Data")
+		plt.subplot(212)
+		plt.title("MSE vs k")
+		plt.xlabel("k (order of polynomial)")
+		plt.ylabel("MSE (log scale)")
+		plt.xlim(-1,10)
+		plt.yscale('log', nonposy='clip')
+		plt.plot([i for i in range(0,len(MSE_arr))], MSE_arr, 'go')
+		
+		plt.show()
 	
 	
 		
@@ -137,7 +164,11 @@ def main():
 	rfile = sys.argv[1]
 	maxK = int(sys.argv[2])
 	nFolds = int(sys.argv[3])
-	verbose = bool(sys.argv[4])
+	if (sys.argv[4] == "0"):
+		verbose = False
+	else:
+		verbose = True
+	print "maxK: " + str(maxK) + " nFolds: " + str(nFolds) + " verbose: " + str(verbose)
 	
 	csvfile = open(rfile, 'rb')
 	dat = csv.reader(csvfile, delimiter=',')
