@@ -111,7 +111,8 @@ def nfoldpolyfit(X, Y, maxK, n, verbose):
 				#plt.show()
 			
 			
-			
+			plt.plot(X_trainingset, Y_trainingset, 'ro', X_testingset,Y_testingset, 'bo', vals, h, 'k')
+			plt.show()
 			#print "Training Set:"
 			#print X_trainingset
 			#print Y_trainingset
