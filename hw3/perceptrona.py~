@@ -1,48 +1,54 @@
 import sys
 import csv
 import numpy as np
-#import scipy
 import matplotlib.pyplot as plt
 
 
 def perceptrona(w_init, X, Y):
-	#figure out (w, k) and return them here. w is the vector of weights, k is how many iterations it took to converge.
-	print w_init, X, Y
-	k = 0
+#	PERCEPTRONA Find weights for linear discrimination problem.
+#   	PERCEPTRONA(w_init, X,Y) finds and returns the weights w as well as e, the number of 
+#	epochs it took to reach convergence to solve the linear discrimination problem described by
+#	samples in X with corresponding labels in Y
+# 
+#   w_init is a vector (in numpy) of length 2 containing the initial guess for the weights of the 
+#	linear discriminants
+#
+#   X and Y are vectors of datapoints specifying  input (X) and output (Y)
+#   of the classification to be learned. Class support for inputs X,Y: 
+#   float, double, single
+#
+#   AUTHOR: Marc Gyongyosi 
+
+	e = 0
 	w = w_init
 	solution = False
 	total_count = len(Y)
+	error_count = total_count
 	while solution is not True:
-		correct_count = 0
-		#print "new try"
+		error_count = total_count
+	
 		for xk,yk in zip(X,Y):
-			k += 1
-			g_x = xk*w[0]+w[1]
+			g_x = w[0]+w[1]*xk
 			h_x = 0
+			
 			if (g_x > 0):
 				h_x = 1
 			else:
 				h_x = -1
-			#print "Classification says: " + str(h_x) + " is supposed to be: " + str(yk)
+				
 			if (h_x == yk):
-				correct_count += 1
+				error_count -= 1
 			else:
-				w = w + yk * np.array([xk, yk])
-				#print "new w: "
-				#print w
-				vals = np.arange(X2.min(), X2.max(), (X2.max()+abs(X2.min()))/100)
-				tests = np.zeros(len(vals))
-				for t in tests:
-					t =w[0]+ t * w[1]
-				plt.plot(X,Y,'ro', vals, tests, 'k')
-				plt.show()
-				break
-
-		if (correct_count == total_count):
+				w = w + yk * np.array([1, xk])
+				
+				
+		e += 1
+		if (error_count == 0):
 			solution = True
-			print "all good!"
+			print "Done!"
+		
 
-	return (w, k)
+	return (w, e)
 
 
 def main():
@@ -65,26 +71,33 @@ def main():
 	X2 = np.array(X2)
 	Y1 = np.array(Y1)
 	Y2 = np.array(Y2)
-	
-	w_init = np.zeros(2)# INTIALIZE W_INIT
+
+	print "--------"
+	print "Starting Perceptron on X1, Y1"
+	w_init = np.array([0,0])# INTIALIZE W_INIT
 	w, k = perceptrona(w_init, X1, Y1)
 	vals = np.arange(X1.min(), X1.max(), (X1.max()+abs(X1.min()))/100)
 	tests = np.zeros(len(vals))
 	for t in tests:
 		t =w[0]+ t * w[1]
-	print "Convergence took " + str(k) + " trials"
-	plt.plot(X1,Y1,'ro', vals, tests, 'k')
-	plt.show()
-	
-	w_init = np.zeros(2)# INTIALIZE W_INIT
+	print "Convergence took " + str(k) + " epochs"
+	print "Weights: w_0=" + str(w[0]) + " w_1=" + str(w[1])
+	#plt.plot(X1,Y1,'ro', vals, tests, 'k')
+	#plt.show()
+	"""
+	print "--------"
+	print "Starting Test 2"
+	w_init = np.array([0,0])# INTIALIZE W_INIT
 	w, k = perceptrona(w_init, X2, Y2)
 	vals = np.arange(X2.min(), X2.max(), (X2.max()+abs(X2.min()))/100)
 	tests = np.zeros(len(vals))
 	for t in tests:
 		t =w[0]+ t * w[1]
 	print "Convergence took " + str(k) + " trials"
+	print "Weights: w_0=" + str(w[0]) + " w_1=" + str(w[1])
 	plt.plot(X2,Y2,'ro', vals, tests, 'k')
 	plt.show()
+	"""
 	
 	
 

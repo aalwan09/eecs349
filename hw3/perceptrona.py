@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 def perceptrona(w_init, X, Y):
 #	PERCEPTRONA Find weights for linear discrimination problem.
-#   PERCEPTRONA(w_init, X,Y) finds and returns the weights w as well as e, the number of 
+#   	PERCEPTRONA(w_init, X,Y) finds and returns the weights w as well as e, the number of 
 #	epochs it took to reach convergence to solve the linear discrimination problem described by
 #	samples in X with corresponding labels in Y
 # 
@@ -73,17 +73,17 @@ def main():
 	Y2 = np.array(Y2)
 
 	print "--------"
-	print "Starting Test 1"
+	print "Starting Perceptron on X1, Y1"
 	w_init = np.array([0,0])# INTIALIZE W_INIT
 	w, k = perceptrona(w_init, X1, Y1)
 	vals = np.arange(X1.min(), X1.max(), (X1.max()+abs(X1.min()))/100)
 	tests = np.zeros(len(vals))
 	for t in tests:
 		t =w[0]+ t * w[1]
-	print "Convergence took " + str(k) + " trials"
+	print "Convergence took " + str(k) + " epochs"
 	print "Weights: w_0=" + str(w[0]) + " w_1=" + str(w[1])
-	plt.plot(X1,Y1,'ro', vals, tests, 'k')
-	plt.show()
+	#plt.plot(X1,Y1,'ro', vals, tests, 'k')
+	#plt.show()
 	"""
 	print "--------"
 	print "Starting Test 2"
