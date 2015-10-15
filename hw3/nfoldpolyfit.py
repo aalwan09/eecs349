@@ -1,10 +1,6 @@
-#	Starter code for linear regression problem
-#	Below are all the modules that you'll need to have working to complete this problem
-#	Some helpful functions: np.polyfit, scipy.polyval, zip, np.random.shuffle, np.argmin, np.sum, plt.boxplot, plt.subplot, plt.figure, plt.title
 import sys
 import csv
 import numpy as np
-#import scipy
 import math
 import matplotlib.pyplot as plt
 
