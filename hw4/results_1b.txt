@@ -1,0 +1,12 @@
+Maximum review count: 737 found at index: 
+
+[404]
+
+Minimum review count: 20 found at index: 
+
+[18, 33, 35, 92, 142, 146, 165, 201, 241, 299, 308, 363, 417, 440, 474, 557, 570, 571, 595, 630, 635, 684, 731, 739, 808, 811, 823, 865, 872, 887, 894, 925]
+
+
+yes, the data follows Zipf's Gesetz. 
+
+
