@@ -1,0 +1,4 @@
+
+mean of number of reviews in common: 18.8079220449
+
+median of number of reviews in common: 10.0
