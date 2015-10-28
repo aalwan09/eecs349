@@ -1,55 +1,116 @@
+# - *- coding: utf- 8 - *-
 # Starter code for uesr-based collaborative filtering
 # Complete the function user_based_cf below. Do not change it arguments and return variables. 
 # Do not change main() function, 
 
 # import modules you need here.
+# import modules you need here.
 import sys
+import numpy as np
 
+import scipy
+import scipy.stats 
 
+#GPU stuff:
+from numba import autojit
+
+@autojit
 def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
-    '''
-    build user-based collaborative filter that predicts the rating 
-    of a user for a movie.
-    This function returns the predicted rating and its actual rating.
-    
-    Parameters
-    ----------
-    <datafile> - a fully specified path to a file formatted like the MovieLens100K data file u.data 
-    <userid> - a userId in the MovieLens100K data
-    <movieid> - a movieID in the MovieLens 100K data set
-    <distance> - a Boolean. If set to 0, use Pearson’s correlation as the distance measure. If 1, use Manhattan distance.
-    <k> - The number of nearest neighbors to consider
-    <iFlag> - A Boolean value. If set to 0 for user-based collaborative filtering, 
-    only users that have actual (ie non-0) ratings for the movie are considered in your top K. 
-    For user-based, use only movies that have actual ratings by the user in your top K. 
-    If set to 1, simply use the top K regardless of whether the top K contain actual or filled-in ratings.
+	'''
+	build user-based collaborative filter that predicts the rating 
+	of a user for a movie.
+	This function returns the predicted rating and its actual rating.
 
-    returns
-    -------
-    trueRating: <userid>'s actual rating for <movieid>
-    predictedRating: <userid>'s rating predicted by collaborative filter for <movieid>
+	Parameters
+	----------
+	<datafile> - a fully specified path to a file formatted like the MovieLens100K data file u.data 
+	<userid> - a userId in the MovieLens100K data
+	<movieid> - a movieID in the MovieLens 100K data set
+	<distance> - a Boolean. If set to 0, use Pearson’s correlation as the distance measure. If 1, use Manhattan distance.
+	<k> - The number of nearest neighbors to consider
+	<iFlag> - A Boolean value. If set to 0 for user-based collaborative filtering, 
+	only users that have actual (ie non-0) ratings for the movie are considered in your top K. 
+	For user-based, use only movies that have actual ratings by the user in your top K. 
+	If set to 1, simply use the top K regardless of whether the top K contain actual or filled-in ratings.
+
+	returns
+	-------
+	trueRating: <userid>'s actual rating for <movieid>
+	predictedRating: <userid>'s rating predicted by collaborative filter for <movieid>
 
 
-    AUTHOR: Bongjun Kim (This is where you put your name)
-    '''
-  
-    return trueRating, predictedRating
+	AUTHOR: Bongjun Kim (This is where you put your name)
+	'''
+  	inputArray = np.loadtxt(datafile)
+	maxUser = 0;
+	maxMovie = 0;
+	for row in inputArray:
+		if row[0] > maxUser:
+			maxUser = row[0]	
+		if row[1] > maxMovie:
+			maxMovie = row[1]
+	dataArray = np.zeros((int(maxUser), int(maxMovie)))
+	for row in inputArray:
+		dataArray[int(row[0])-1][int(row[1])-1] = row[2]
+
+	distancesArr = []
+	rotateArr = dataArray.view()
+	rotateArr.T
+	target_movie = rotateArr[movieid-1]
+
+	if (iFlag == 1):
+		for i, j in enumerate(dataArray):
+			if (i == (userid-1)):
+				distancesArr.append(99999);
+			else:
+				if (distance == 0):
+					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
+				elif (distance == 1):
+					distancesArr.append(-1*manhattan_dist(target_movie, j))
+
+		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		sum_k = 0;
+		for index in k_indexes_of_min_distance:
+			sum_k += dataArray[userid-1][index]
+		predictedRating = sum_k/k
+		trueRating = dataArray[userid-1][movieid-1]
+	if (iFlag == 0):
+		for i, j in enumerate(dataArray):
+			if (i == (userid-1)):
+				distancesArr.append(99999);
+			elif (dataArray[userid-1][movieid-1] == 0.):
+				distancesArr.append(99999);
+			else:
+				if (distance == 0):
+					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
+				elif (distance == 1):
+					distancesArr.append(-1*manhattan_dist(target_movie, j))
+
+		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		sum_k = 0;
+		for index in k_indexes_of_min_distance:
+			sum_k += dataArray[userid-1][index]
+		predictedRating = sum_k/k
+		trueRating = dataArray[userid-1][movieid-1]			
+		
+
+	return trueRating, predictedRating
 
 
 def main():
-    datafile = sys.argv[1]
-    userid = int(sys.argv[2])
-    movieid = int(sys.argv[3])
-    distance = int(sys.argv[4])
-    k = int(sys.argv[5])
-    i = int(sys.argv[6])
+	datafile = sys.argv[1]
+	userid = int(sys.argv[2])
+	movieid = int(sys.argv[3])
+	distance = int(sys.argv[4])
+	k = int(sys.argv[5])
+	i = int(sys.argv[6])
 
-    trueRating, predictedRating = user_based_cf(datafile, userid, movieid, distance, k, i)
-    print 'userID:{} movieID:{} trueRating:{} predictedRating:{} distance:{} K:{} I:{}'\
-    .format(userid, movieid, trueRating, predictedRating, distance, k, i)
+	trueRating, predictedRating = user_based_cf(datafile, userid, movieid, distance, k, i)
+	print 'userID:{} movieID:{} trueRating:{} predictedRating:{} distance:{} K:{} I:{}'\
+	.format(userid, movieid, trueRating, predictedRating, distance, k, i)
 
 
 
 
 if __name__ == "__main__":
-    main()
+	main()

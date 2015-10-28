@@ -1,25 +1,23 @@
 # - *- coding: utf- 8 - *-
-# Starter code for item-based collaborative filtering
-# Complete the function item_based_cf below. Do not change its name, arguments and return variables. 
+# Starter code for uesr-based collaborative filtering
+# Complete the function user_based_cf below. Do not change it arguments and return variables. 
 # Do not change main() function, 
 
 # import modules you need here.
+# import modules you need here.
 import sys
 import numpy as np
-from numba import autojit
+
 import scipy
 import scipy.stats 
 
-def manhattan_dist(a,b):
-	distance = 0
-	for i,j in enumerate(a):
-		distance += abs(j-b[i])
-	return distance
+#GPU stuff:
+from numba import autojit
 
 @autojit
-def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
+def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	'''
-	build item-based collaborative filter that predicts the rating 
+	build user-based collaborative filter that predicts the rating 
 	of a user for a movie.
 	This function returns the predicted rating and its actual rating.
 
@@ -32,7 +30,7 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	<k> - The number of nearest neighbors to consider
 	<iFlag> - A Boolean value. If set to 0 for user-based collaborative filtering, 
 	only users that have actual (ie non-0) ratings for the movie are considered in your top K. 
-	For item-based, use only movies that have actual ratings by the user in your top K. 
+	For user-based, use only movies that have actual ratings by the user in your top K. 
 	If set to 1, simply use the top K regardless of whether the top K contain actual or filled-in ratings.
 
 	returns
@@ -41,10 +39,9 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	predictedRating: <userid>'s rating predicted by collaborative filter for <movieid>
 
 
-	AUTHOR: Marc Gyongyosi
+	AUTHOR: Bongjun Kim (This is where you put your name)
 	'''
-	
-	inputArray = np.loadtxt(datafile)
+  	inputArray = np.loadtxt(datafile)
 	maxUser = 0;
 	maxMovie = 0;
 	for row in inputArray:
@@ -56,14 +53,12 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	for row in inputArray:
 		dataArray[int(row[0])-1][int(row[1])-1] = row[2]
 
-	rotateArr = dataArray.view()
-	rotateArr.T
 	distancesArr = []
 	target_movie = rotateArr[movieid-1]
 
 	if (iFlag == 1):
-		for i, j in enumerate(rotateArr):
-			if (i == (movieid-1)):
+		for i, j in enumerate(dataArray):
+			if (i == (userid-1)):
 				distancesArr.append(99999);
 			else:
 				if (distance == 0):
@@ -78,8 +73,8 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		predictedRating = sum_k/k
 		trueRating = dataArray[userid-1][movieid-1]
 	if (iFlag == 0):
-		for i, j in enumerate(rotateArr):
-			if (i == (movieid-1)):
+		for i, j in enumerate(dataArray):
+			if (i == (userid-1)):
 				distancesArr.append(99999);
 			elif (dataArray[userid-1][movieid-1] == 0.):
 				distancesArr.append(99999);
@@ -108,7 +103,7 @@ def main():
 	k = int(sys.argv[5])
 	i = int(sys.argv[6])
 
-	trueRating, predictedRating = item_based_cf(datafile, userid, movieid, distance, k, i)
+	trueRating, predictedRating = user_based_cf(datafile, userid, movieid, distance, k, i)
 	print 'userID:{} movieID:{} trueRating:{} predictedRating:{} distance:{} K:{} I:{}'\
 	.format(userid, movieid, trueRating, predictedRating, distance, k, i)
 
