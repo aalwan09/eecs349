@@ -71,7 +71,7 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
 		sum_k = 0;
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
+			sum_k += dataArray[index][movieid-1]
 		predictedRating = sum_k/k
 		trueRating = dataArray[userid-1][movieid-1]
 	if (iFlag == 0):
@@ -89,7 +89,7 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
 		sum_k = 0;
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
+			sum_k += dataArray[index][movieid-1]
 		predictedRating = sum_k/k
 		trueRating = dataArray[userid-1][movieid-1]			
 		
