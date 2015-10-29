@@ -57,32 +57,45 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		dataArray[int(row[0])-1][int(row[1])-1] = row[2]
 
 	rotateArr = dataArray.view()
-	rotateArr.T
+	rotateArr = rotateArr.T
 	distancesArr = []
 	target_movie = rotateArr[movieid-1]
-
+	print "data Array:"
+	print dataArray
+	print "rotate Array:"
+	print rotateArr	
+	print "target_movie:"
+	print target_movie
+	
 	if (iFlag == 1):
 		for i, j in enumerate(rotateArr):
 			if (i == (movieid-1)):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
 					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
 				elif (distance == 1):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
-
+		print "distancesArr:"
+		print distancesArr
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		sum_k = 0;
+		print "k_indexes:"
+		print k_indexes_of_min_distance
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[userid-1][index])
+
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]
+
 	if (iFlag == 0):
 		for i, j in enumerate(rotateArr):
 			if (i == (movieid-1)):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			elif (dataArray[userid-1][movieid-1] == 0.):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
 					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
@@ -90,10 +103,13 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		sum_k = 0;
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[userid-1][index])
+
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]			
 		
 

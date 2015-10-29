@@ -14,6 +14,12 @@ import scipy.stats
 #GPU stuff:
 from numba import autojit
 
+def manhattan_dist(a,b):
+	distance = 0
+	for i,j in enumerate(a):
+		distance += abs(j-b[i])
+	return distance
+
 @autojit
 def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	'''
@@ -61,7 +67,7 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	if (iFlag == 1):
 		for i, j in enumerate(dataArray):
 			if (i == (userid-1)):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
 					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
@@ -69,17 +75,20 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		sum_k = 0;
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[index][movieid-1]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[index][movieid-1])
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]
+
 	if (iFlag == 0):
 		for i, j in enumerate(dataArray):
 			if (i == (userid-1)):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			elif (dataArray[userid-1][movieid-1] == 0.):
-				distancesArr.append(99999);
+				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
 					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
@@ -87,10 +96,12 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		sum_k = 0;
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[index][movieid-1]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[index][movieid-1])
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]			
 		
 
