@@ -81,16 +81,21 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
 		print "k_indexes:"
 		print k_indexes_of_min_distance
-		sum_k = 0;
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[userid-1][index])
+		print "k_ratings:"
+		print k_ratings
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]
+
 	if (iFlag == 0):
 		for i, j in enumerate(rotateArr):
 			if (i == (movieid-1)):
 				distancesArr.append(-99999);
-			elif (dataArray[userid-1][movieid-1] == 0.):
+			elif (j[userid-1] == 0.):
 				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
@@ -99,10 +104,14 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		sum_k = 0;
+
+		k_ratings = [];
 		for index in k_indexes_of_min_distance:
-			sum_k += dataArray[userid-1][index]
-		predictedRating = sum_k/k
+			k_ratings.append(dataArray[userid-1][index])
+		print "k_ratings:"
+		print k_ratings
+		predictedRating = scipy.stats.mode(k_ratings)[0][0]
+
 		trueRating = dataArray[userid-1][movieid-1]			
 		
 

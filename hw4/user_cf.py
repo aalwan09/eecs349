@@ -80,14 +80,15 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[index][movieid-1])
 		predictedRating = scipy.stats.mode(k_ratings)[0][0]
-
+		#print "k_ratings:"
+		#print k_ratings
 		trueRating = dataArray[userid-1][movieid-1]
 
 	if (iFlag == 0):
 		for i, j in enumerate(dataArray):
 			if (i == (userid-1)):
 				distancesArr.append(-99999);
-			elif (dataArray[userid-1][movieid-1] == 0.):
+			elif (j[movieid-1] == 0.):
 				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
