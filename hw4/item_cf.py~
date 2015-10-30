@@ -6,9 +6,12 @@
 # import modules you need here.
 import sys
 import numpy as np
-from numba import autojit
+
 import scipy
 import scipy.stats 
+
+#optimization stuff:
+#from numba import autojit
 
 def manhattan_dist(a,b):
 	distance = 0
@@ -16,7 +19,8 @@ def manhattan_dist(a,b):
 		distance += abs(j-b[i])
 	return distance
 
-@autojit
+#optimization stuff:
+#@autojit
 def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	'''
 	build item-based collaborative filter that predicts the rating 
@@ -60,12 +64,12 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	rotateArr = rotateArr.T
 	distancesArr = []
 	target_movie = rotateArr[movieid-1]
-	print "data Array:"
-	print dataArray
-	print "rotate Array:"
-	print rotateArr	
-	print "target_movie:"
-	print target_movie
+	#print "data Array:"
+	#print dataArray
+	#print "rotate Array:"
+	#print rotateArr	
+	#print "target_movie:"
+	#print target_movie
 	
 	if (iFlag == 1):
 		for i, j in enumerate(rotateArr):
@@ -76,17 +80,17 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
 				elif (distance == 1):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
-		print "distancesArr:"
-		print distancesArr
+		#print "distancesArr:"
+		#print distancesArr
 		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-		print "k_indexes:"
-		print k_indexes_of_min_distance
+		#print "k_indexes:"
+		#print k_indexes_of_min_distance
 
 		k_ratings = [];
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[userid-1][index])
-		print "k_ratings:"
-		print k_ratings
+		#print "k_ratings:"
+		#print k_ratings
 		predictedRating = scipy.stats.mode(k_ratings)[0][0]
 
 		trueRating = dataArray[userid-1][movieid-1]
@@ -108,8 +112,8 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		k_ratings = [];
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[userid-1][index])
-		print "k_ratings:"
-		print k_ratings
+		#print "k_ratings:"
+		#print k_ratings
 		predictedRating = scipy.stats.mode(k_ratings)[0][0]
 
 		trueRating = dataArray[userid-1][movieid-1]			

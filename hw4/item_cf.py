@@ -6,9 +6,12 @@
 # import modules you need here.
 import sys
 import numpy as np
-from numba import autojit
+
 import scipy
 import scipy.stats 
+
+#optimization stuff:
+#from numba import autojit
 
 def manhattan_dist(a,b):
 	distance = 0
@@ -16,7 +19,8 @@ def manhattan_dist(a,b):
 		distance += abs(j-b[i])
 	return distance
 
-@autojit
+#optimization stuff:
+#@autojit
 def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	'''
 	build item-based collaborative filter that predicts the rating 

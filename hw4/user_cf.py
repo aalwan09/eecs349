@@ -4,15 +4,15 @@
 # Do not change main() function, 
 
 # import modules you need here.
-# import modules you need here.
+
 import sys
 import numpy as np
 
 import scipy
 import scipy.stats 
 
-#GPU stuff:
-from numba import autojit
+#optimization stuff:
+#from numba import autojit
 
 def manhattan_dist(a,b):
 	distance = 0
@@ -20,7 +20,8 @@ def manhattan_dist(a,b):
 		distance += abs(j-b[i])
 	return distance
 
-@autojit
+#optimization stuff:
+#@autojit
 def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	'''
 	build user-based collaborative filter that predicts the rating 
@@ -45,7 +46,7 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	predictedRating: <userid>'s rating predicted by collaborative filter for <movieid>
 
 
-	AUTHOR: Bongjun Kim (This is where you put your name)
+	AUTHOR: Marc Gyongyosi (This is where you put your name)
 	'''
   	inputArray = np.loadtxt(datafile)
 	maxUser = 0;
