@@ -48,7 +48,12 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 
 	AUTHOR: Marc Gyongyosi (This is where you put your name)
 	'''
-  	inputArray = np.loadtxt(datafile)
+	if type(datafile) is str:
+  		inputArray = np.loadtxt(datafile)
+  	else:
+  		inputArray = datafile[:]
+  	trueRating = 0
+  	predictedRating = 0
 	maxUser = 0;
 	maxMovie = 0;
 	for row in inputArray:
@@ -61,9 +66,8 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 		dataArray[int(row[0])-1][int(row[1])-1] = row[2]
 
 	distancesArr = []
-	rotateArr = dataArray.view()
-	rotateArr.T
-	target_movie = rotateArr[movieid-1]
+	
+	target_user = dataArray[userid-1]
 
 	if (iFlag == 1):
 		for i, j in enumerate(dataArray):
@@ -71,12 +75,12 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
-					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
+					distancesArr.append(scipy.stats.pearsonr(target_user, j)[0])
 				elif (distance == 1):
-					distancesArr.append(-1*manhattan_dist(target_movie, j))
+					distancesArr.append(-1*manhattan_dist(target_user, j))
 
-		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-
+		#k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		k_indexes_of_min_distance = sorted(range(len(distancesArr)), key=lambda x: distancesArr[x])[-k:]
 		k_ratings = [];
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[index][movieid-1])
@@ -93,12 +97,12 @@ def user_based_cf(datafile, userid, movieid, distance, k, iFlag):
 				distancesArr.append(-99999);
 			else:
 				if (distance == 0):
-					distancesArr.append(scipy.stats.pearsonr(target_movie, j)[0])
+					distancesArr.append(scipy.stats.pearsonr(target_user, j)[0])
 				elif (distance == 1):
-					distancesArr.append(-1*manhattan_dist(target_movie, j))
+					distancesArr.append(-1*manhattan_dist(target_user, j))
 
-		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-
+		#k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		k_indexes_of_min_distance = sorted(range(len(distancesArr)), key=lambda x: distancesArr[x])[-k:]
 		k_ratings = [];
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[index][movieid-1])

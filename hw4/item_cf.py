@@ -26,7 +26,6 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	build item-based collaborative filter that predicts the rating 
 	of a user for a movie.
 	This function returns the predicted rating and its actual rating.
-
 	Parameters
 	----------
 	<datafile> - a fully specified path to a file formatted like the MovieLens100K data file u.data 
@@ -38,17 +37,20 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 	only users that have actual (ie non-0) ratings for the movie are considered in your top K. 
 	For item-based, use only movies that have actual ratings by the user in your top K. 
 	If set to 1, simply use the top K regardless of whether the top K contain actual or filled-in ratings.
-
 	returns
 	-------
 	trueRating: <userid>'s actual rating for <movieid>
 	predictedRating: <userid>'s rating predicted by collaborative filter for <movieid>
-
-
 	AUTHOR: Marc Gyongyosi
 	'''
 	
-	inputArray = np.loadtxt(datafile)
+	if type(datafile) is str:
+  		inputArray = np.loadtxt(datafile)
+  	else:
+  		inputArray = datafile[:]
+
+  	trueRating = 0
+  	predictedRating = 0
 	maxUser = 0;
 	maxMovie = 0;
 	for row in inputArray:
@@ -82,7 +84,8 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 		#print "distancesArr:"
 		#print distancesArr
-		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		#k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		k_indexes_of_min_distance = sorted(range(len(distancesArr)), key=lambda x: distancesArr[x])[-k:]
 		#print "k_indexes:"
 		#print k_indexes_of_min_distance
 
@@ -107,8 +110,8 @@ def item_based_cf(datafile, userid, movieid, distance, k, iFlag):
 				elif (distance == 1):
 					distancesArr.append(-1*manhattan_dist(target_movie, j))
 
-		k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
-
+		#k_indexes_of_min_distance = np.argpartition(distancesArr, -k)[-k:]
+		k_indexes_of_min_distance = sorted(range(len(distancesArr)), key=lambda x: distancesArr[x])[-k:]
 		k_ratings = [];
 		for index in k_indexes_of_min_distance:
 			k_ratings.append(dataArray[userid-1][index])
