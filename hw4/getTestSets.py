@@ -254,11 +254,11 @@ def main():
 	#k_set = [1,2,4,8,16,32]
 	k_set = [16]
 	i_set = [0,1]
-	i_set = [0]
+	#i_set = [0]
 	distance_set = [0,1]
-	distance_set = [0]
-	trials = 5
-	N = 10
+	#distance_set = [0]
+	trials = 50
+	N = 100
 	
 	##for each setting run this trials times and after trials times create an errorMeasure with the settings and two arrays corresponding to the individual error measures MPE, MSE
 	
