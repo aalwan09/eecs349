@@ -80,8 +80,7 @@ def is_spam(content, dictionary, spam_prior_probability):
 			add_spam += m.log(dictionary[word]['spam'],10)
 			add_ham += m.log(dictionary[word]['ham'],10)
 		else:
-			add_spam += m.log(spam_prior_probability,10)
-			add_spam += m.log((1-spam_prior_probability),10)
+			pass
 
 	prob_spam += add_spam
 	prob_ham += add_ham

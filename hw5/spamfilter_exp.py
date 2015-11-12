@@ -22,10 +22,8 @@ def writedictionary(dictionary, dictionary_filename):
 		output.write(line)
 		
 
-def makedictionary(spam_directory, ham_directory, dictionary_filename):
+def makedictionary(spam_directory, ham_directory, spam, ham, dictionary_filename):
 	#Making the dictionary. 
-	spam = [f for f in os.listdir(spam_directory) if os.path.isfile(os.path.join(spam_directory, f))]
-	ham = [f for f in os.listdir(ham_directory) if os.path.isfile(os.path.join(ham_directory, f))]
 	
 	spam_prior_probability = len(spam)/float((len(spam) + len(ham)))
 	
@@ -81,8 +79,7 @@ def is_spam(content, dictionary, spam_prior_probability):
 			add_spam += m.log(dictionary[word]['spam'],10)
 			add_ham += m.log(dictionary[word]['ham'],10)
 		else:
-			add_spam += m.log(spam_prior_probability,10)
-			add_spam += m.log((1-spam_prior_probability),10)
+			pass
 
 	prob_spam += add_spam
 	prob_ham += add_ham
@@ -96,17 +93,14 @@ def is_spam(content, dictionary, spam_prior_probability):
 
 
 
-def spamsort(mail_directory, spam_directory, ham_directory, dictionary, spam_prior_probability):
+def spamsort(directory, mail, dictionary, spam_prior_probability):
 	spam_count = 0
-	mail = [f for f in os.listdir(mail_directory) if os.path.isfile(os.path.join(mail_directory, f))]
 	for m in mail:
-		content = parse(open(mail_directory + m))
+		content = parse(open(directory + m))
 		spam = is_spam(content, dictionary, spam_prior_probability)
 		if spam:
-			shutil.copy(mail_directory + m, spam_directory)
 			spam_count += 1
-		else:
-			shutil.copy(mail_directory + m, ham_directory)
+
 	return spam_count
 
 def valid_path(dir_path, filename):
@@ -118,13 +112,9 @@ def valid_path(dir_path, filename):
 
 if __name__ == "__main__":
 	#Here you can test your functions. Pass it a training_spam_directory, a training_ham_directory, and a mail_directory that is filled with unsorted mail on the command line. It will create two directories in the directory where this file exists: sorted_spam, and sorted_ham. The files will show up  in this directories according to the algorithm you developed.
-	training_spam_directory = sys.argv[1]
-	training_ham_directory = sys.argv[2]
+	spam_directory = sys.argv[1]
+	ham_directory = sys.argv[2]
 	
-	test_mail_directory = sys.argv[3]
-	test_spam_directory = 'sorted_spam'
-	test_ham_directory = 'sorted_ham'
-
 	exp_spam_training = "exp_spam_training/"
 	exp_spam_testing = "exp_spam_testing/"
 	exp_ham_training = "exp_ham_training/"
@@ -132,22 +122,18 @@ if __name__ == "__main__":
 	
 	directory = [exp_spam_training, exp_spam_testing, exp_ham_training, exp_ham_testing]
 	
-	if not os.path.exists(test_spam_directory):
-		os.mkdir(test_spam_directory)
-	if not os.path.exists(test_ham_directory):
-		os.mkdir(test_ham_directory)
 	
-	dictionary_filename = "dictionary.dict"
+	dictionary_filename = "exp_dictionary.dict"
 
 	for d in directory:
 		if os.path.exists(d):
 			shutil.rmtree(d)
 		os.mkdir(d)
 
-	src_files = [ f for f in os.listdir(training_spam_directory) if os.path.isfile(os.path.join(training_spam_directory,f))]
-	spam_files = [f for f in src_files if valid_path(training_spam_directory, f)]
-	src_files = [ f for f in os.listdir(training_ham_directory) if os.path.isfile(os.path.join(training_ham_directory,f))]
-	ham_files = [f for f in src_files if valid_path(training_ham_directory, f)]
+	src_files = [ f for f in os.listdir(spam_directory) if os.path.isfile(os.path.join(spam_directory,f))]
+	spam_files = [f for f in src_files if valid_path(spam_directory, f)]
+	src_files = [ f for f in os.listdir(ham_directory) if os.path.isfile(os.path.join(ham_directory,f))]
+	ham_files = [f for f in src_files if valid_path(ham_directory, f)]
 
 	N = 10
 
@@ -180,14 +166,24 @@ if __name__ == "__main__":
 		testing_files_ham = ham_files[n*number_files_ham:(n+1)*number_files_ham]
 		training_files_spam = spam_files[0:n*number_files_spam] + spam_files[(n+1)*number_files_spam:N*number_files_spam]
 		training_files_ham = ham_files[0:n*number_files_ham] + ham_files[(n+1)*number_files_ham:N*number_files_ham]
+		"""
 		print "------"
 		print len(testing_files_spam)
 		print len(testing_files_ham)
 		print len(testing_files_spam) + len(testing_files_ham)
 		print len(training_files_spam) + len(training_files_ham)
+		"""
+		#print testing_files_ham
+		dictionary, spam_prior_probability = makedictionary(spam_directory, ham_directory, training_files_spam, training_files_ham, dictionary_filename)		
 
-	
-	#create the dictionary to be used
-	dictionary, spam_prior_probability = makedictionary(training_spam_directory, training_ham_directory, dictionary_filename)
-	#sort the mail
-	spamsort(test_mail_directory, test_spam_directory, test_ham_directory, dictionary, spam_prior_probability) 
+		spam_spam_count = spamsort(spam_directory, testing_files_spam, dictionary, spam_prior_probability) 
+		ham_spam_count = spamsort(ham_directory, testing_files_ham, dictionary, spam_prior_probability)
+
+		print "-----------"
+		print "Run: " +str(n)
+		print "Correctly identified as spam: " + str(spam_spam_count) + " out of " +str(len(spam_files))
+		print "Wrongly identified as spam: " + str(ham_spam_count) + " out of " +str(len(ham_files))
+		error = ((len(spam_files) - spam_spam_count) + ham_spam_count) / float(len(ham_files) + len(spam_files))
+		print "Error rate: " +str(error)
+		print "Prior Probability Error: " + str(len(spam_files)/float(len(ham_files)+len(spam_files)))
+
