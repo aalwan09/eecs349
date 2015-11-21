@@ -154,12 +154,12 @@ def main():
 	wt_init = [.6,.4]
 	its = 15
 
-	mu_m1, sigmasq_m1, wt_m1, L_m1 = gmmest(class1, mu_init, sigmasq_init, wt_init, its)
+	#mu_m1, sigmasq_m1, wt_m1, L_m1 = gmmest(class1, mu_init, sigmasq_init, wt_init, its)
 
 	##correct model:
-	#mu_m1 = [9.7748859239173544, 29.582587183104856]
-	#sigmasq_m1 = [21.92280456650424, 9.7837696118328275]
-	#wt_m1 = [0.59765463040062106, 0.40234536960541073]
+	mu_m1 = [9.7748859239173544, 29.582587183104856]
+	sigmasq_m1 = [21.92280456650424, 9.7837696118328275]
+	wt_m1 = [0.59765463040062106, 0.40234536960541073]
 	
 	print "_________________________________"
 	print "             MODEL 1:            "
@@ -167,10 +167,10 @@ def main():
 	print "   - VARIANCE: " + str(sigmasq_m1)
 	print "   - WEIGHTS:  " + str(wt_m1)
 
-	plt.plot(L_m1)
-	plt.ylabel('log-likelihood of class 1')
-	plt.xlabel('number of iterations')
-	plt.show()
+	#plt.plot(L_m1)
+	#plt.ylabel('log-likelihood of class 1')
+	#plt.xlabel('number of iterations')
+	#plt.show()
 
 	###MODEL 2:
 	mu_init = [-25,-5,48] ### based on histogram plot
@@ -178,12 +178,12 @@ def main():
 	wt_init = [.2,.4,.4]
 	its = 15
 
-	mu_m2, sigmasq_m2, wt_m2, L_m2 = gmmest(class2, mu_init, sigmasq_init, wt_init, its)
+	#mu_m2, sigmasq_m2, wt_m2, L_m2 = gmmest(class2, mu_init, sigmasq_init, wt_init, its)
 
-	##correct model:
-	#mu_m2 =   [-24.822751728656179, -5.0601582832182022, 49.624444719527538]
-	#sigmasq_m2 =  [7.9473354079952401, 23.322661814154543, 100.02433750441253]
-	#wt_m2 =  [0.20364945852846328, 0.49884302379533918, 0.29750751767685873]
+	#correct model:
+	mu_m2 =   [-24.822751728656179, -5.0601582832182022, 49.624444719527538]
+	sigmasq_m2 =  [7.9473354079952401, 23.322661814154543, 100.02433750441253]
+	wt_m2 =  [0.20364945852846328, 0.49884302379533918, 0.29750751767685873]
 
 
 
@@ -193,11 +193,11 @@ def main():
 	print "   - VARIANCE: " + str(sigmasq_m2)
 	print "   - WEIGHTS:  " + str(wt_m2)
 
-	plt.plot(L_m2)
-	plt.ylabel('log-likelihood of class 2')
-	plt.xlabel('number of iterations')
+	#plt.plot(L_m2)
+	#plt.ylabel('log-likelihood of class 2')
+	#plt.xlabel('number of iterations')
 	
-	plt.show()
+	#plt.show()
 
 	PP = len(class1)/float(len(X_train))
 	print "_________________________________"
@@ -219,7 +219,9 @@ def main():
 
 	class1 = X_test[np.nonzero(Y_test==1)[0]]
 	class2 = X_test[np.nonzero(Y_test==2)[0]]
-
+	print len(X_test)
+	print len(class1)
+	print len(class2)
 	#print cl
 	plt.scatter(X_test, [0.06]*len(X_test), c=cl, alpha=0.3)
 	plt.hist(class1, bins, alpha =0.5, label='Class1', normed=True)
