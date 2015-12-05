@@ -11,7 +11,7 @@ def preprocess(images):
     
     for image in images:
         for x in image:
-            x = x/255d
+            x = x/double(255)
     return [i.flatten() for i in images]
 
 def build_classifier(images, labels):
@@ -46,6 +46,10 @@ if __name__ == "__main__":
     
     # preprocessing
     images = preprocess(images)
+    
+    for i in range(0,50):
+        plt.imshow(images[i], cmap = 'gray')
+        plt.show()
     
     # pick training and testing set
     # YOU HAVE TO CHANGE THIS TO PICK DIFFERENT SET OF DATA
