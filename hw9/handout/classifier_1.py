@@ -6,6 +6,12 @@ def preprocess(images):
     #this function is suggested to help build your classifier. 
     #You might want to do something with the images before 
     #handing them to the classifier. Right now it does nothing.
+    
+    ##we need to normalize the images
+    
+    for image in images:
+        for x in image:
+            x = x/255d
     return [i.flatten() for i in images]
 
 def build_classifier(images, labels):
