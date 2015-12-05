@@ -29,7 +29,7 @@ def build_classifier(images, labels):
     #this will actually build the classifier. In general, it
     #will call something from sklearn to build it, and it must
     #return the output of sklearn. Right now it does nothing.
-    classifier = svm.SVC()
+    classifier = svm.SVC(gamma=0.001)
     classifier.fit(images, labels)
     return classifier
 
@@ -57,23 +57,24 @@ if __name__ == "__main__":
     
     # preprocessing
     
-    aaa = preprocess(images)
-    print len(aaa)
-    print aaa[0]
-    for i in range(0,50):
-        plt.imshow(np.reshape(aaa[i], (28, 28)), cmap = 'binary', interpolation='nearest')
-        plt.show()
+    #aaa = preprocess(images)
+
+    images = [i.flatten() for i in images]
+
+    # for i in range(0,50):
+    #     plt.imshow(np.reshape(aaa[i], (28, 28)), cmap = 'binary', interpolation='nearest')
+    #     plt.show()
     
     # pick training and testing set
     # YOU HAVE TO CHANGE THIS TO PICK DIFFERENT SET OF DATA
-    training_set = images[0:1000]
-    training_labels = labels[0:1000]
-    testing_set = images[-100:]
-    testing_labels = labels[-100:]
+    training_set = images[0:40000]
+    training_labels = labels[0:40000]
+    testing_set = images[40000:60000]
+    testing_labels = labels[40000:60000]
 
     #build_classifier is a function that takes in training data and outputs an sklearn classifier.
     classifier = build_classifier(training_set, training_labels)
     save_classifier(classifier, training_set, training_labels)
-    classifier = pickle.load(open('classifier'))
+    classifier = pickle.load(open('classifier_1.p'))
     predicted = classify(testing_set, classifier)
     print error_measure(predicted, testing_labels)
