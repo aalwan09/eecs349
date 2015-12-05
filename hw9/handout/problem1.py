@@ -5,7 +5,9 @@ from mnist import load_mnist
 
 
 
-images, labels = load_mnist(digits=[2], path='.')
+for i in range(0,10):
+    images, labels = load_mnist(digits=[i], path='.')
 
-print "number of images: " + str(len(images))
+    print str(i) + " number of images: " + str(len(images))
+
 
