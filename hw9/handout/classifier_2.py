@@ -4,7 +4,7 @@ from sklearn import svm # this is an example of using SVM
 from sklearn.neighbors import KNeighborsClassifier
 from mnist import load_mnist
 import numpy as np
-
+import matplotlib.pyplot as plt
 
 #fairtraintest return Training and Testing Arrays of size trainsize and testsize (x28x28)
 #it selects example so as to have an equal distribution of each label - You can also put 0 for testsize or trainsize, and then it just returns an equal distribution of labels
@@ -79,20 +79,27 @@ def preprocess(images):
     
     ##we need to normalize the images
     
+
+
+
+
+
     length = len(images)
     processedimages = np.zeros((length, 784))
     #print length
     #print images[0][0][0]
     #print images[0]
     #print len(images[0])
-    
-    for i in range(0,len(images)):
+    print length
+    for i,im in enumerate(images):
+    	print len(images)
+    	print len(images[0])
+    	print len(images[0][0])
         for j in range(0,28):
         	for k in range(0,28):
         		if images[i][j][k] > 0.5:
         			processedimages[i][j*28+k] = 1.
- 	#print processedimages[0]
- 	#print len(processedimages[0])
+        		
 	return processedimages
 
 def build_classifier(images, labels, K):
@@ -127,20 +134,30 @@ def fivefoldsize(images, labels, K):
         Score = np.zeros(5) #array of errors to collect after each fold 
 
         for i in xrange(0, 5):
-            Imgtraining = np.array(Imgslices[:i] + Imgslices[(i+1):]) #get the training sets by exluding one of the slices
-            Labeltraining = np.array(Labelslices[:i] + Labelslices[(i+1):])
-            Imgtraining.flatten() #formatting
-            Labeltraining.flatten()
-            print "fold: " + str(i)
-            print "training classifier"
+			Imgtraining = np.array(Imgslices[:i] + Imgslices[(i+1):]) #get the training sets by exluding one of the slices
+			Labeltraining = np.array(Labelslices[:i] + Labelslices[(i+1):])
+			Imgtraining.flatten() #formatting
+			Labeltraining.flatten()
+			print "fold: " + str(i)
+			print "training classifier"
 
-            ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
-            ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
+			ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
+			ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
 
-            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, K)
-            score = classifier.score(Imgslices[i], Labelslices[i])
-            print "Score at fold " + str(i) +  " : " + str(score)
-            Score[i] = score
+			classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, K)
+			#print Imgslices[i][0]
+			#print Labelslices[i][0]
+			#plt.imshow(Imgslices[i][0], cmap = 'binary', interpolation="nearest")
+			#plt.show()
+			predictions = classifier.predict(Imgslices[i])
+			error_count = 0
+			print Labelslices[i]
+			print predictions
+			for j,p in enumerate(predictions):
+				if (p != Labelslices[i][j]):
+					error_count += 1
+			print "Error at fold " + str(i) +  " : " + str(float(error_count)/len(predictions))
+			Score[i] = float(error_count/len(predictions))
         return np.average(Score)
 
 def TrainingSizeFold(images, labels):
@@ -181,10 +198,13 @@ if __name__ == "__main__":
 
     # Code for loading data
     images, labels = load_mnist(digits=range(0,10), path = '.')
-    
+
     #preprocessing
-    #need to bring images into binary
-    images = preprocess(images)
+    #need to bring images into vector format
+    images = [i.flatten() for i in images]
+    #print images
+    
+
  
     #Training on different Sizes - ANALYSIS: 
     TrainingSizeFold(images, labels)
