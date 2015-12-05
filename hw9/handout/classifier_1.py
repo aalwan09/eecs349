@@ -1,6 +1,7 @@
 import pickle
 import sklearn
 from sklearn import svm # this is an example of using SVM
+from mnist import load_mnist
 
 def preprocess(images):
     #this function is suggested to help build your classifier. 
@@ -11,7 +12,10 @@ def preprocess(images):
     
     for image in images:
         for x in image:
-            x = x/double(255)
+            if x > 127:
+                x = 1
+            else:
+                x = 0
     return [i.flatten() for i in images]
 
 def build_classifier(images, labels):
