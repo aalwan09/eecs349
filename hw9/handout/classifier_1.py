@@ -11,11 +11,12 @@ def preprocess(images):
     ##we need to normalize the images
     
     for image in images:
-        for x in image:
-            if x > 127:
-                x = 1
-            else:
-                x = 0
+        for row in image:
+            for x in row:
+                if x > 0.5:
+                    x = 1
+                else:
+                    x = 0
     return [i.flatten() for i in images]
 
 def build_classifier(images, labels):
