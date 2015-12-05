@@ -117,7 +117,7 @@ if __name__ == "__main__":
     #No preprocessing as SVM performs better with scaled weights
 
     images = [i.flatten() for i in images]
-
+    print images[0]
     #Training on different Sizes - ANALYSIS: 
     # TrainingSizeFold(images, labels)
     
