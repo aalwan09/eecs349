@@ -52,6 +52,7 @@ def fairtraintest(images, labels, trainsize, testsize):
 			elif doneTraining[label] == False and Traintotalcount < trainsize and trainsize > 0:
 				TrainingSet[Traintotalcount] = images[indexes[count]]
 				TrainLabels[Traintotalcount] = label
+
 				Traintotalcount += 1
 				Traincounts[label] += 1 
 

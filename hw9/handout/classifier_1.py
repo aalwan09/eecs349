@@ -8,29 +8,25 @@ from experiments import fairtraintest
 
 
 def preprocess(images):
+    pass
     #this function is suggested to help build your classifier. 
     #You might want to do something with the images before 
     #handing them to the classifier. Right now it does nothing.
-    
     ##we need to normalize the images
-    
-    length = len(images)
-    processedimages = np.zeros((length, 748))
 
+    #No need for preprocess on SVM as we use gradient 
 
-    for i in xrange(0, length):
-        for j in xrange(0,748):
-                if images[i][j][l] > 0.5:
-                     processedimages[i][j][l] = 1
-
-    return processedimages
-
-def build_classifier(images, labels, c, deg):
+def build_classifier(images, labels, c, deg, poly):
     #this will actually build the classifier. In general, it
     #will call something from sklearn to build it, and it must
     #return the output of sklearn. Right now it does nothing.
-    classifier = svm.SVC(C=c, degree=deg)
-    classifier.fit(images, labels)
+
+    if poly == 1:
+        classifier = svm.SVC(C=c, degree=deg, kernel='poly')
+        classifier.fit(images, labels)
+    else:
+        classifier = svm.SVC(C=c, degree=deg)
+        classifier.fit(images, labels)
     return classifier
 
 ##the functions below are required
@@ -51,7 +47,7 @@ def error_measure(predicted, actual):
     return np.count_nonzero(abs(predicted - actual))/float(len(predicted))
 
 
-def fivefoldsize(images, labels, C, degree):
+def fivefoldsize(images, labels, C, degree, poly):
         Imgslices = [images[j::5] for j in xrange(5)] #slices both our X and Y into n parts
         Labelslices = [labels[l::5] for l in xrange(5)]
         Error = np.zeros(5) #array of errors to collect after each fold 
@@ -67,7 +63,7 @@ def fivefoldsize(images, labels, C, degree):
             ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
             ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
 
-            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree)
+            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
             predicted = classify(Imgslices[i], classifier)
             error = error_measure(predicted, Labelslices[i])
             print "Error at fold " + str(i) +  " : " + str(error)
@@ -75,37 +71,87 @@ def fivefoldsize(images, labels, C, degree):
         return np.average(Error)
 
 def TrainingSizeFold(images, labels):
-    TrainingSizes = [1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 25000, 40000, 60000]
+    TrainingSizes = [1000, 2000, 4000, 10000]
     SizeE = np.zeros(len(TrainingSizes))
     for i in xrange(0, len(TrainingSizes)): 
         print "Training on: " + str(TrainingSizes[i])
         newimages, newlabels, temp, temp2 = fairtraintest(images, labels, TrainingSizes[i], 0)
-        SizeE[i] = fivefoldsize(newimages, newlabels, 1.0, 3)
+        #print len(newimages)
+        #print len(newlabels)
+
+        SizeE[i] = fivefoldsize(newimages, newlabels, 1.0, 3, -1)
         print "Avg Error at training size: " + str(SizeE[i])
 
     print SizeE[i]
     np.savetxt('SizeAnalysisSVM.txt', SizeE, delimiter=',') 
 
 def TrainingCFold(images, labels):
-    # TrainingCvalues = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 3, 4, 5, 6, 7, 8, 9, 10]
-    TrainingCvalues = [15, 20, 30, 50]
-    print TrainingCvalues
+    TrainingCvalues = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 3, 4, 5, 6, 7, 8, 9, 10]
     SizeE = np.zeros(len(TrainingCvalues))
     
     for i in xrange(0, len(TrainingCvalues)): 
         print "Training on: c = " + str(TrainingCvalues[i])
-        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, TrainingCvalues[i], 3.0)
+        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, TrainingCvalues[i], 3.0, -1)
         print "Avg Error at training size: " + str(SizeE[i])
 
     print SizeE[i]
-    np.savetxt('CAnalysisSVM.out', SizeE, delimiter=',') 
+    np.savetxt('CAnalysisSVM.txt', SizeE, delimiter=',') 
 
+def TrainingPolyFold(images, labels): 
+    TrainingPolyvalues = [0,1,2,3]
+    SizeE = np.zeros(len(TrainingPolyvalues))
+    
+    for i in xrange(0, len(TrainingPolyvalues)): 
+        print "Training on: degree = " + str(i)
+        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, 50, i, 1)
+        print "Avg Error at training size: " + str(SizeE[i])
+
+    print SizeE[i]
+    np.savetxt('PolyAnalysisSVM.txt', SizeE, delimiter=',') 
 
 def buildConfusionMatrix(predicted, actual):
     matrix = np.zeros((10,10))
     for i in xrange(0,len(predicted)):
         matrix[actual[i]][predicted[i]] += 1
     return matrix
+
+
+def fivefoldconfusion(images, labels, C, degree, poly):
+
+        Imgslices = [images[j::5] for j in xrange(5)] #slices both our X and Y into n parts
+        Labelslices = [labels[l::5] for l in xrange(5)]
+        Error = np.zeros(5) #array of errors to collect after each fold 
+        myConfusionMatrixes = np.zeros((5,10,10))
+
+
+        for i in xrange(0, 5):
+            Imgtraining = np.array(Imgslices[:i] + Imgslices[(i+1):]) #get the training sets by exluding one of the slices
+            Labeltraining = np.array(Labelslices[:i] + Labelslices[(i+1):])
+            Imgtraining.flatten() #formatting
+            Labeltraining.flatten()
+            print "fold: " + str(i)
+            print "training classifier"
+
+            ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
+            ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
+
+            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
+            predicted = classify(Imgslices[i], classifier)
+
+            error = error_measure(predicted, Labelslices[i])
+            print "Error at fold " + str(i) +  " : " + str(error)
+            myConfusionMatrixes[i] = buildConfusionMatrix(predicted, Labelslices[i])
+            #print myConfusionMatrixes[i]
+
+
+            for k in xrange(0, len(predicted)):
+                if(predicted[k] != Labelslices[i][k]):
+                    print "predicted: " + str(predicted[k])
+                    print "actual: " + str(Labelslices[i][k])
+                    plt.imshow(np.reshape(Imgslices[i][k], (28, 28)), cmap = 'binary', interpolation='nearest')
+                    plt.show()
+
+        
 
 
 if __name__ == "__main__":
@@ -119,23 +165,34 @@ if __name__ == "__main__":
     images = [i.flatten() for i in images]
 
     #Training on different Sizes - ANALYSIS: 
-    # TrainingSizeFold(images, labels)
+    #TrainingSizeFold(images, labels)
     
 
-    # picking training and testing set for optimizing SVM
+    #picking training and testing set for optimizing SVM
 
-    # SelectedImages, SelectedLabels, temp, temp2 = fairtraintest(images, labels, 10000, 0)
+    #SelectedImages, SelectedLabels, temp, temp2 = fairtraintest(images, labels, 1000, 0)
     import pickle
-    # pickle.dump(SelectedImages, open('training_set_1.p', 'w'))
-    # pickle.dump(SelectedLabels, open('training_labels_1.p', 'w'))
+    #pickle.dump(SelectedImages, open('training_set_1.p', 'w'))
+    #pickle.dump(SelectedLabels, open('training_labels_1.p', 'w'))
 
     SelectedImages = pickle.load(open('training_set_1_final.p'))
     SelectedLabels = pickle.load(open('training_labels_1_final.p'))
 
+
+
+    #TrainingSizeFold(SelectedImages, SelectedLabels)
+
+
+
     #Training on C coefficient
-    TrainingCFold(SelectedImages, SelectedLabels)
+    #TrainingCFold(SelectedImages, SelectedLabels)
+
+    #Training on Poly Coefs
+    #TrainingPolyFold(SelectedImages, SelectedLabels)
     
     #optimized classifier (from what we learnt in 5-fold): 
-    Error = fivefoldsize(SelectedImages, SelectedLabels,bestc, 3)
+    #fivefoldconfusion(SelectedImages, SelectedLabels, 50, 2, 1)
+
+    #Error = fivefoldsize(SelectedImages, SelectedLabels, , 3)
     #save_classifier(classifier, training_set, training_labels)
     
