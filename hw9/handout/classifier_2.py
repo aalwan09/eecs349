@@ -167,7 +167,7 @@ def TrainingSizeFold(images, labels):
         print "Training on: " + str(TrainingSizes[i])
         newimages, newlabels, temp, temp2 = fairtraintest(images, labels, TrainingSizes[i], 0)
         SizeS[i] = fivefoldsize(newimages, newlabels, 3)
-        print "Avg Score at training size: " + str(SizeS[i])
+        print "Avg Error at training size: " + str(SizeS[i])
 
     print SizeS[i]
     np.savetxt('SizeAnalysisKNN.txt', SizeS, delimiter=',') 
@@ -202,10 +202,7 @@ if __name__ == "__main__":
     #preprocessing
     #need to bring images into vector format
     images = [i.flatten() for i in images]
-    #print images
-    
-
- 
+  
     #Training on different Sizes - ANALYSIS: 
     TrainingSizeFold(images, labels)
     
