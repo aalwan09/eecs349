@@ -1,6 +1,8 @@
 import pickle
 import sklearn
 from sklearn import svm # this is an example of using SVM
+from mnist import load_mnist
+
 
 def preprocess(images):
     #this function is suggested to help build your classifier. 
@@ -33,6 +35,12 @@ def classify(images, classifier):
 def error_measure(predicted, actual):
     return np.count_nonzero(abs(predicted - actual))/float(len(predicted))
 
+def buildConfusionMatrix(predicted, actual):
+	matrix = np.zeros((10,10))
+	for i in xrange(0,len(predicted)):
+		matrix[actual[i]][predicted[i]] += 1
+	return matrix
+
 if __name__ == "__main__":
 
     # Code for loading data
@@ -53,3 +61,7 @@ if __name__ == "__main__":
     classifier = pickle.load(open('classifier'))
     predicted = classify(testing_set, classifier)
     print error_measure(predicted, testing_labels)
+
+    # print "label: " + str(labels[7413])
+    # plt.imshow(np.reshape(images[7413], (28, 28)), cmap = 'binary', interpolation='nearest')
+    # plt.show()

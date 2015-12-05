@@ -15,12 +15,11 @@ def preprocess(images):
     ##we need to normalize the images
     
     length = len(images)
-    processedimages = np.zeros((length, 28,28))
+    processedimages = np.zeros((length, 748))
 
 
     for i in xrange(0, length):
-        for j in xrange(0,28):
-            for l in xrange(0,28):
+        for j in xrange(0,748):
                 if images[i][j][l] > 0.5:
                      processedimages[i][j][l] = 1
 
@@ -55,7 +54,7 @@ def error_measure(predicted, actual):
 def fivefoldsize(images, labels, C, degree):
         Imgslices = [images[j::5] for j in xrange(5)] #slices both our X and Y into n parts
         Labelslices = [labels[l::5] for l in xrange(5)]
-        Error = np.zeros(5) #array of errors to collect after each fold
+        Error = np.zeros(5) #array of errors to collect after each fold 
 
         for i in xrange(0, 5):
             Imgtraining = np.array(Imgslices[:i] + Imgslices[(i+1):]) #get the training sets by exluding one of the slices
@@ -88,32 +87,25 @@ def TrainingSizeFold(images, labels):
     np.savetxt('SizeAnalysisSVM.txt', SizeE, delimiter=',') 
 
 def TrainingCFold(images, labels):
-    TrainingCvalues = [0.25, 0.5, 0.75, 1, 1.25, 2, 3]
+    # TrainingCvalues = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1.25, 1.5, 1.75, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    TrainingCvalues = [15, 20, 30, 50]
+    print TrainingCvalues
     SizeE = np.zeros(len(TrainingCvalues))
     
     for i in xrange(0, len(TrainingCvalues)): 
         print "Training on: c = " + str(TrainingCvalues[i])
-        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, i, 3.0)
+        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, TrainingCvalues[i], 3.0)
         print "Avg Error at training size: " + str(SizeE[i])
 
     print SizeE[i]
     np.savetxt('CAnalysisSVM.out', SizeE, delimiter=',') 
 
 
-def TrainingDegreeFold(images, labels): 
-    TrainingDvalues = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-    SizeE = np.zeros(len(TrainingDvalues))
-    
-    for i in xrange(0, len(TrainingCvalues)): 
-        print "Training on: degree = " + str(TrainingDvalues[i])
-        SizeE[i] = fivefoldsize(SelectedImages, SelectedLabels, 1.0, i)
-        print "Avg Error at training size: " + str(SizeE[i])
-
-    print SizeE[i]
-    np.savetxt('DegreeAnalysisSVM.out', SizeE, delimiter=',') 
-
-
-
+def buildConfusionMatrix(predicted, actual):
+    matrix = np.zeros((10,10))
+    for i in xrange(0,len(predicted)):
+        matrix[actual[i]][predicted[i]] += 1
+    return matrix
 
 
 if __name__ == "__main__":
@@ -121,45 +113,29 @@ if __name__ == "__main__":
     # Code for loading data
     images, labels = load_mnist(digits=range(0,10), path = '.')
     
-    # preprocessing
-    
-    #aaa = preprocess(images)
+    #preprocessing
+    #No preprocessing as SVM performs better with scaled weights
 
     images = [i.flatten() for i in images]
 
-
-    # print "label: " + str(labels[7413])
-    # plt.imshow(np.reshape(images[7413], (28, 28)), cmap = 'binary', interpolation='nearest')
-    # plt.show()
+    #Training on different Sizes - ANALYSIS: 
+    # TrainingSizeFold(images, labels)
     
-    # pick training and testing set
-    # YOU HAVE TO CHANGE THIS TO PICK DIFFERENT SET OF DATA
 
-    #TrainingSizeFold(images, labels)
+    # picking training and testing set for optimizing SVM
 
-    SelectedImages, SelectedLabels, temp, temp2 = fairtraintest(images, labels, 10000, 0)
+    # SelectedImages, SelectedLabels, temp, temp2 = fairtraintest(images, labels, 10000, 0)
     import pickle
-    pickle.dump(SelectedImages, open('training_set_1.p', 'w'))
-    pickle.dump(SelectedLabels, open('training_labels_1.p', 'w'))
+    # pickle.dump(SelectedImages, open('training_set_1.p', 'w'))
+    # pickle.dump(SelectedLabels, open('training_labels_1.p', 'w'))
+
+    SelectedImages = pickle.load(open('training_set_1_final.p'))
+    SelectedLabels = pickle.load(open('training_labels_1_final.p'))
+
+    #Training on C coefficient
     TrainingCFold(SelectedImages, SelectedLabels)
-    TrainingDegreeFold(SelectedImages, SelectedLabels)
-
-    # training_set = images[0:6000]
-    # training_labels = labels[0:6000]
-    # testing_set = images[6000:8000]
-    # testing_labels = labels[6000:8000]
-
-    # fairtraintest(images, labels, trainsize, testsize) - returns equally distributed Train and Test data 
     
-    # Trainset, Trainlab, Testset, Testlab = fairtraintest(images, labels, 1587, 0)
-
-    #TrainingSetPerformanceFair(images, labels)
-
-
-    #build_classifier is a function that takes in training data and outputs an sklearn classifier.
-
-    #classifier = build_classifier([images[:48000]], [labels[:48000]], 1.0, 3)
-    # save_classifier(classifier, training_set, training_labels)
-    # classifier = pickle.load(open('classifier_1.p'))
-    #predicted = classify(images[48000:], classifier)
-    #print error_measure(predicted, labels[48000:])
+    #optimized classifier (from what we learnt in 5-fold): 
+    Error = fivefoldsize(SelectedImages, SelectedLabels,bestc, 3)
+    #save_classifier(classifier, training_set, training_labels)
+    
