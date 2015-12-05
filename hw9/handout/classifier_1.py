@@ -2,6 +2,9 @@ import pickle
 import sklearn
 from sklearn import svm # this is an example of using SVM
 from mnist import load_mnist
+import matplotlib.pyplot as plt
+import numpy as np
+
 
 def preprocess(images):
     #this function is suggested to help build your classifier. 
@@ -10,14 +13,17 @@ def preprocess(images):
     
     ##we need to normalize the images
     
-    for image in images:
-        for row in image:
-            for x in row:
-                if x > 0.5:
-                    x = 1
-                else:
-                    x = 0
-    return [i.flatten() for i in images]
+    length = len(images)
+    processedimages = np.zeros((length, 28,28))
+
+
+    for i in xrange(0, length):
+        for j in xrange(0,28):
+            for l in xrange(0,28):
+                if images[i][j][l] > 0.5:
+                     processedimages[i][j][l] = 1
+
+    return processedimages
 
 def build_classifier(images, labels):
     #this will actually build the classifier. In general, it
@@ -50,10 +56,12 @@ if __name__ == "__main__":
     images, labels = load_mnist(digits=range(0,10), path = '.')
     
     # preprocessing
-    images = preprocess(images)
     
+    aaa = preprocess(images)
+    print len(aaa)
+    print aaa[0]
     for i in range(0,50):
-        plt.imshow(images[i], cmap = 'gray')
+        plt.imshow(np.reshape(aaa[i], (28, 28)), cmap = 'binary', interpolation='nearest')
         plt.show()
     
     # pick training and testing set
