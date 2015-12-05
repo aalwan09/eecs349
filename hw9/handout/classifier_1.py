@@ -36,7 +36,7 @@ def error_measure(predicted, actual):
 if __name__ == "__main__":
 
     # Code for loading data
-    images, labels = load_mnist(digits=[0], path = '.')
+    images, labels = load_mnist(digits=range(0,10), path = '.')
     
     # preprocessing
     images = preprocess(images)
