@@ -70,7 +70,7 @@ def fairtraintest(images, labels, trainsize, testsize):
         return TrainingSet, TrainLabels, TestingSet, TestingLabels
 
 def preprocess(images):
-    pass
+    return [i.flatten() for i in images]
     #this function is suggested to help build your classifier. 
     #You might want to do something with the images before 
     #handing them to the classifier. Right now it does nothing.
@@ -78,7 +78,7 @@ def preprocess(images):
 
     #No need for preprocess on SVM as we use gradient 
 
-def build_classifier(images, labels, c, deg, poly):
+def custom_build_classifier(images, labels, c, deg, poly):
     #this will actually build the classifier. In general, it
     #will call something from sklearn to build it, and it must
     #return the output of sklearn. Right now it does nothing.
@@ -91,8 +91,19 @@ def build_classifier(images, labels, c, deg, poly):
         classifier.fit(images, labels)
     return classifier
 
+def build_classifier(images, labels):
+    #this will actually build the classifier. In general, it
+    #will call something from sklearn to build it, and it must
+    #return the output of sklearn. Right now it does nothing.
+    classifier = svm.SVC(C=50, degree=2, kernel='poly')
+    classifier.fit(images, labels)
+    return classifier
+
+
+
+
 ##the functions below are required
-def save_classifier(classifier):
+def save_classifier(classifier, training_set, training_labels):
     #this saves the classifier to a file "classifier" that we will
     #load from. It also saves the data that the classifier was trained on.
     import pickle
@@ -124,7 +135,7 @@ def fivefoldsize(images, labels, C, degree, poly):
             ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
             ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
 
-            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
+            classifier = custom_build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
             predicted = classify(Imgslices[i], classifier)
             error = error_measure(predicted, Labelslices[i])
             print "Error at fold " + str(i) +  " : " + str(error)
@@ -196,7 +207,7 @@ def fivefoldconfusion(images, labels, C, degree, poly):
             ConcatenatedImages = np.concatenate((Imgtraining[0], Imgtraining[1], Imgtraining[2], Imgtraining[3]))
             ConcatenatedLabels = np.concatenate((Labeltraining[0], Labeltraining[1], Labeltraining[2], Labeltraining[3]))
 
-            classifier = build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
+            classifier = custom_build_classifier(ConcatenatedImages, ConcatenatedLabels, C, degree, poly)
             predicted = classify(Imgslices[i], classifier)
 
             error = error_measure(predicted, Labelslices[i])
@@ -223,7 +234,7 @@ if __name__ == "__main__":
     #preprocessing
     #No preprocessing as SVM performs better with scaled weights
 
-    images = [i.flatten() for i in images]
+    images = preprocess(images)
 
     #Training on different Sizes - ANALYSIS: 
     #TrainingSizeFold(images, labels)
@@ -231,14 +242,14 @@ if __name__ == "__main__":
 
     #picking training and testing set for optimizing SVM
 
-    #SelectedImages, SelectedLabels, temp, temp2 = fairtraintest(images, labels, 1000, 0)
+    SelectedImages, SelectedLabels, TestingSet, TestingLabels = fairtraintest(images, labels, 8000, 2000)
 
-    import pickle
+    #import pickle
     #pickle.dump(SelectedImages, open('training_set_1.p', 'w'))
     #pickle.dump(SelectedLabels, open('training_labels_1.p', 'w'))
 
-    SelectedImages = pickle.load(open('training_set_1_final.p'))
-    SelectedLabels = pickle.load(open('training_labels_1_final.p'))
+    #SelectedImages = pickle.load(open('training_set_1.p'))
+    #SelectedLabels = pickle.load(open('training_labels_1.p'))
 
 
     #Training on C coefficient
@@ -251,6 +262,13 @@ if __name__ == "__main__":
     #fivefoldconfusion(SelectedImages, SelectedLabels, 50, 2, 1)
 
     #Error = fivefoldsize(SelectedImages, SelectedLabels, , 3)
-    #classifier = build_classifier(SelectedImages, SelectedLabels, 50, 2, 1)
-    #save_classifier(classifier)
+    #classifier = custom_build_classifier(SelectedImages, SelectedLabels, 50, 2, 1)
+    #save_classifier(classifier, images, labels)
+
+    classifier = build_classifier(SelectedImages, SelectedLabels)
+    save_classifier(classifier, SelectedImages, SelectedLabels)
+    classifier = pickle.load(open('classifier_1.p'))
+    predicted = classify(TestingSet, classifier)
+    print error_measure(predicted, TestingLabels)
+
     
